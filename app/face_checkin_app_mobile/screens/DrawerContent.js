@@ -14,10 +14,9 @@ import {
     DrawerContentScrollView,
     DrawerItem
 } from '@react-navigation/drawer';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 export function DrawerContent(props){
-  console.log(props,'props')
     return(
         <View style={{flex:1}}>
             <DrawerContentScrollView {...props}>
@@ -40,47 +39,43 @@ export function DrawerContent(props){
                     <Drawer.Section style={styles.drawerSection}>
                       <DrawerItem 
                         icon={({color, size})=>(
-                          <Icon
-                          name='home-outline'
+                          <Icon name="rocket"
                           color={color}
                           size={size}
                           />
                         )}
                         label="Home"
-                        onPress={()=>{}}
+                        onPress={()=>{props.navigation.navigate('Home')}}
                       />
                       <DrawerItem 
                         icon={({color, size})=>(
-                          <Icon
-                          name='account-outline'
+                          <Icon name="rocket"
                           color={color}
                           size={size}
                           />
                         )}
-                        label="Profile"
-                        onPress={()=>{}}
+                        label="Checkin"
+                        onPress={()=>{props.navigation.navigate('Checkin')}}
                       />
                       <DrawerItem 
                         icon={({color, size})=>(
-                          <Icon
-                          name='bookmark-outline'
+                          <Icon name="rocket"
                           color={color}
                           size={size}
                           />
                         )}
-                        label="Bookmark"
-                        onPress={()=>{}}
+                        label="Login"
+                        onPress={()=>{props.navigation.navigate('Login')}}
                       />
                       <DrawerItem 
                         icon={({color, size})=>(
-                          <Icon
-                          name='settings-outline'
+                          <Icon name="rocket"
                           color={color}
                           size={size}
                           />
                         )}
-                        label="Settings"
-                        onPress={()=>{}}
+                        label="History"
+                        onPress={()=>{props.navigation.navigate('History')}}
                       />
                     </Drawer.Section>
                    
@@ -89,8 +84,7 @@ export function DrawerContent(props){
             <Drawer.Section style={styles.bottomDrawerSection}>
                 <DrawerItem 
                   icon={({color, size})=>(
-                    <Icon
-                    name='exit-to-app'
+                    <Icon name="rocket"
                     color={color}
                     size={size}
                     />
