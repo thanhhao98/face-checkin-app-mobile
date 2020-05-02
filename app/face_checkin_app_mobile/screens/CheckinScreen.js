@@ -1,53 +1,73 @@
 import React from 'react';
-import { StyleSheet, View, Button } from 'react-native';
-import { Title } from 'react-native-paper';
-import { RNCamera } from 'react-native-camera';
+import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import {RNCamera}  from 'react-native-camera';
 
-function CheckinScreen({ navigation }) {
+export default class CheckinScreen extends React.Component {
+  render() {
     return (
-        <View style={styles.container}>
-            <RNCamera
-            
-                 ref={(cam)=>{
-                    this.Camera = cam
-                }}
-                style={styles.view}
-                aspect={Camera.constants.Aspect.fill}>
-                    <Text
-                    style={styles.capture} 
-                    onpress={this.takePicture.bind(this)}>
-                        [CAPTURE_IMAGE]
-                    </Text>
-            </RNCamera> 
+      <View style={styles.container}>
+        <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center',height:100 }}>
+          <Text style={{color:'white'}}>Checking</Text>
         </View>
+        <RNCamera
+          ref={ref => {
+            this.camera = ref;
+          }}
+          style={styles.preview}
+          type={RNCamera.Constants.Type.front}
+          flashMode={RNCamera.Constants.FlashMode.on}
+          androidCameraPermissionOptions={{
+            title: 'Permission to use camera',
+            message: 'We need your permission to use your camera',
+            buttonPositive: 'Ok',
+            buttonNegative: 'Cancel',
+          }}
+          androidRecordAudioPermissionOptions={{
+            title: 'Permission to use audio recording',
+            message: 'We need your permission to use your audio',
+            buttonPositive: 'Ok',
+            buttonNegative: 'Cancel',
+          }}
+          onGoogleVisionBarcodesDetected={({ barcodes }) => {
+            console.log(barcodes);
+          }}
+        />
+        <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
+          <TouchableOpacity onPress={this.takePicture.bind(this)} style={styles.capture}>
+            <Text style={{ fontSize: 14 }}> SNAP </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     );
-}
-function takePicture(){
-    const option = {}
+  }
 
-    this.camera.capture({metadata: option}).then((data) => {
-        console.log(data)
-    }).catch((error)=>{
-        console.log(error)
-    })
+  takePicture = async () => {
+    if (this.camera) {
+      const options = { quality: 0.5, base64: true };
+      const data = await this.camera.takePictureAsync(options);
+      console.log(data.uri);
+    }
+  };
+
 }
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        flexDirection: 'row'
-    },
-    view: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        alignItems: 'center'
-    },
-    capture: {
-        flex: 0,
-        backgroundColor: 'blue',
-        borderRadius: 10,
-        color: 'red',
-        padding: 15,
-        margin: 45
-    }
-})
-export default CheckinScreen;
+  container: {
+    flex: 1,
+    flexDirection: 'column',
+    backgroundColor: 'black',
+  },
+  preview: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  capture: {
+    flex: 0,
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    padding: 15,
+    paddingHorizontal: 20,
+    alignSelf: 'center',
+    margin: 20,
+  },
+});

@@ -79,6 +79,10 @@ target 'face_checkin_app_mobile' do
 
   pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
 
+  pod 'react-native-camera', :path => '../node_modules/react-native-camera'
+
+  pod 'react-native-camera-kit', :path => '../node_modules/react-native-camera-kit'
+
   target 'face_checkin_app_mobileTests' do
     inherit! :complete
     # Pods for testing
