@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import * as React from 'react';
-import { Text, View } from 'react-native';
+import { Button, View } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 
@@ -12,8 +12,11 @@ import HistoryScreen from './screens/HistoryScreen';
 function HomeScreen({ navigation }) {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>HOme</Text>
-    </View>
+    <Button
+      onPress={() => navigation.navigate('Checkin')}
+      title="Checkin nào ae ơi"
+    />
+  </View>
   );
 }
 
@@ -21,7 +24,8 @@ function HomeScreen({ navigation }) {
 
 const Drawer = createDrawerNavigator();
 
-export default function App() {
+const App=()=> {
+
   return (
     <NavigationContainer>
       <Drawer.Navigator initialRouteName="Home" drawerContent={props => <DrawerContent {...props}/>}>
@@ -34,3 +38,4 @@ export default function App() {
     </NavigationContainer>
   );
 }
+export default App;

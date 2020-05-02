@@ -39,7 +39,7 @@ export function DrawerContent(props){
                     <Drawer.Section style={styles.drawerSection}>
                       <DrawerItem 
                         icon={({color, size})=>(
-                          <Icon name="rocket"
+                          <Icon name="home"
                           color={color}
                           size={size}
                           />
@@ -49,7 +49,7 @@ export function DrawerContent(props){
                       />
                       <DrawerItem 
                         icon={({color, size})=>(
-                          <Icon name="rocket"
+                          <Icon name="camera"
                           color={color}
                           size={size}
                           />
@@ -59,7 +59,7 @@ export function DrawerContent(props){
                       />
                       <DrawerItem 
                         icon={({color, size})=>(
-                          <Icon name="rocket"
+                          <Icon name="sign-in"
                           color={color}
                           size={size}
                           />
@@ -69,7 +69,7 @@ export function DrawerContent(props){
                       />
                       <DrawerItem 
                         icon={({color, size})=>(
-                          <Icon name="rocket"
+                          <Icon name="history"
                           color={color}
                           size={size}
                           />
@@ -84,7 +84,7 @@ export function DrawerContent(props){
             <Drawer.Section style={styles.bottomDrawerSection}>
                 <DrawerItem 
                   icon={({color, size})=>(
-                    <Icon name="rocket"
+                    <Icon name="sign-out"
                     color={color}
                     size={size}
                     />
