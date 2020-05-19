@@ -1,10 +1,20 @@
 import numpy as np
+import cv2
+import torch
 import mxnet as mx
 import sklearn.preprocessing
 import os
 
+from lib.arcface.model_irse import IR_50
 
-class Embedder:
+
+def l2_norm(input, axis=1):
+    norm = torch.norm(input, 2, axis, True)
+    output = torch.div(input, norm)
+    return output
+
+
+class ArcFaceMX:
     def __init__(self, model_path):
         ctx = mx.gpu()  # ctx = mx.cpu(0)
         self.model = self._get_model(model_path, ctx, (112, 112), 'fc1')
@@ -31,3 +41,54 @@ class Embedder:
         embedding = self.model.get_outputs()[0].asnumpy()
         embedding = sklearn.preprocessing.normalize(embedding).flatten()
         return embedding
+
+
+class ArcFace:
+    def __init__(self, model_path):
+        self._input_size = 112
+        self._device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu")
+        self._get_model(model_path)
+
+    def _get_model(self, model_path):
+        self.model = IR_50([self._input_size, self._input_size])
+        self.model.load_state_dict(torch.load(model_path))
+        self.model.to(self._device)
+        self.model.eval()
+
+    def get_feature(self, img, tta=False):
+        """Get embedding feature
+        Input
+            img : 112x112 RGB resized, cropped face
+            tta : test time augmentation (hflip)
+        Output
+            512-D embedded feature
+        """
+        face = img.copy()
+        # flip image horizontally if tta
+        if tta:
+            flipped = cv2.flip(face, 1)
+        # numpy to tensor
+        face = face.swapaxes(1, 2).swapaxes(0, 1)
+        face = np.reshape(face, [1, 3, self._input_size, self._input_size])
+        face = np.array(face, dtype=np.float32)
+        face = (face - 127.5) / 128.0
+        face = torch.from_numpy(face)
+        # numpy to tensor if tta
+        if tta:
+            flipped = flipped.swapaxes(1, 2).swapaxes(0, 1)
+            flipped = np.reshape(flipped,
+                                 [1, 3, self._input_size, self._input_size])
+            flipped = np.array(flipped, dtype=np.float32)
+            flipped = (flipped - 127.5) / 128.0
+            flipped = torch.from_numpy(flipped)
+        # forward pass and normalization
+        with torch.no_grad():
+            if tta:
+                emb_batch = self.model(face.to(
+                    self._device)).cpu() + self.model(flipped.to(self._device))
+                feature = l2_norm(emb_batch)
+            else:
+                emb_batch = self.model(face.to(self._device))
+                feature = l2_norm(emb_batch)
+        return feature[0]
