@@ -23,9 +23,13 @@ class MTCNN():
     def align(self, frame):
         img = Image.fromarray(frame[..., ::-1])
         boxes, landmarks = self.detect_faces(img)
+
         # Early return for no faces case
         if landmarks is None:
             return None, None
+        elif len(landmarks) == 0:
+            return None, None
+
         facial5points = [[landmarks[0][j], landmarks[0][j + 5]]
                          for j in range(5)]
         warped_face = warp_and_crop_face(np.array(img),

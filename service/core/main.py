@@ -10,10 +10,9 @@ from identifier import Identifier
 
 
 def main(args):
-    dataset = load_embedding(args)
     detector = MTCNN()
     embedder = ArcFace(args.model)
-    identifier= Identifier(dataset)
+    identifier= Identifier(args.data_path)
     vc = cv2.VideoCapture(0)
     while vc.isOpened():
         isSuccess, frame = vc.read()
@@ -21,7 +20,8 @@ def main(args):
         if face is not None:
             rgb = np.array(face)[..., ::-1]
             feature = embedder.get_feature(rgb)
-            name = identifier.process(feature)
+            name, value = identifier.process(feature)
+            print(name, value)
             x0, y0, x1, y1, _ = bbox
             cv2.rectangle(frame, tuple((int(x0), int(y0))), tuple((int(x1), int(y1))), (0, 255, 0), 2)
             cv2.putText(frame, name, (int(x0), int(y0)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
@@ -58,16 +58,6 @@ def prepare_embedding(args):
         torch.save(embedding, os.path.join(folder_path, 'embedding.pth'))
 
 
-def load_embedding(args):
-    dataset = []
-    path = args.data_dir
-    for folder in os.listdir(path):
-        emb_path = os.path.join(path, folder, 'embedding.pth')
-        embedding = torch.load(emb_path)
-        dataset.append({'name': folder, 'feature': embedding})
-    return dataset
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('function',
@@ -77,7 +67,7 @@ if __name__ == '__main__':
                         type=str,
                         default='models/arcface.pth',
                         help='path to deep learning model')
-    parser.add_argument('--data_dir',
+    parser.add_argument('--data_path',
                         type=str,
                         default='data',
                         help='path to data directory')
