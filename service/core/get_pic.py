@@ -2,7 +2,7 @@ import cv2
 import argparse
 from pathlib import Path
 from PIL import Image
-from mtcnn import MTCNN
+from detector import MTCNN
 from datetime import datetime
 from PIL import Image
 import numpy as np
@@ -22,8 +22,8 @@ if not save_path.exists():
     save_path.mkdir()
 
 cap = cv2.VideoCapture(0)
-cap.set(3, 1280)
-cap.set(4, 720)
+# cap.set(3, 1280)
+# cap.set(4, 720)
 mtcnn = MTCNN()
 
 while cap.isOpened():
@@ -37,7 +37,8 @@ while cap.isOpened():
     key = cv2.waitKey(1) & 0xFF
     if key == ord('t'):
         try:
-            warped_face = np.array(mtcnn.align(frame))[..., ::-1]
+            bbox, face = mtcnn.align(frame)
+            warped_face = np.array(face)[..., ::-1]
             print(warped_face.shape)
             cv2.imwrite(
                 str(save_path / '{}.jpg'.format(

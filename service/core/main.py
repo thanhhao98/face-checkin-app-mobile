@@ -38,11 +38,13 @@ def main(args):
 def prepare_embedding(args):
     embedder = ArcFace(args.model)
     detector = MTCNN()
-    path = args.data_dir
+    path = args.data_path
     for folder in os.listdir(path):
         folder_path = os.path.join(path, folder)
         embs = []
         for f in os.listdir(folder_path):
+            if not f.endswith('.jpg'):
+                continue
             file_path = os.path.join(folder_path, f)
             print(file_path)
             bgr = cv2.imread(file_path)
