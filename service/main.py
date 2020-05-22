@@ -148,7 +148,7 @@ def addFaceUser(currentUser):
             db.session.commit()
         pathEmbedding = os.path.join(app.root_path,subPath)
         if not os.path.isdir(pathEmbedding):
-            os.mkdir(pathEmbedding)
+            os.makedirs(pathEmbedding)
         pathImage = os.path.join(pathEmbedding, str(round(time.time()*100))+'.jpg')
         cv2.imwrite(pathImage, img)
         pathEmbedding = os.path.join(pathEmbedding, app.config['NAME_FILE_EMBEDDING'])
@@ -158,6 +158,28 @@ def addFaceUser(currentUser):
             'status': True,
             'message': 'Add face for user successfully',
             'data': []
+        })
+
+@app.route('/api/v1/loginWithFace', methods=['POST'])
+def loginFace():
+    identifier = Identifier(loadAllUserWithPath())
+    filestr = request.files['face'].read()
+    npimg = np.fromstring(filestr, np.uint8)
+    img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+    feature = embedder.get_feature(img)
+    index = identifier.process(feature)
+    if index == -1:
+        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+    else:
+        user = User.query.filter_by(id=index).first()
+        token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.now() + datetime.timedelta(minutes=app.config['TOKEN_LIFE_TIME'] )}, app.config['SECRET_KEY'])
+        return jsonify({
+            'status': True,
+            'message': '',
+            'data':{
+                'isAdmin': user.isAdmin,
+                'token' : token.decode('UTF-8'),
+            }
         })
 
 
@@ -259,6 +281,42 @@ def getHistoryOfUser(currentUser):
 @adminRequired
 def getHistoryOfAllUser(currentUser):
     checks = CheckHistory.query.all()
+    data = []
+    for check in checks:
+        if check.checkoutTime:
+            checkoutRecord = {
+                'onTime': checkoutOnTime(check.checkoutTime),
+                'time': check.checkoutTime
+            }
+        else:
+            checkoutRecord = None
+        record = {
+            'userId': check.user.id,
+            'username': check.user.username,
+            'checkin': {
+                'onTime': checkinOnTime(check.checkinTime),
+                'time': check.checkinTime
+            },
+            'checkout': checkoutRecord
+        }
+        data.append(record)
+    return jsonify({
+        'status': True,
+        'message': '',
+        'data': data
+    })
+
+@app.route('/api/v1/getCheckHistoryWithUserId/<userId>', methods=['GET'])
+@adminRequired
+def getHistoryUserWithId(currentUser, userId):
+    user = User.query.filter_by(id=int(userId)).first()
+    if not user:
+        return jsonify({
+            'status': False,
+            'message': 'UserId is not exist',
+            'data': []
+        })
+    checks = CheckHistory.query.filter_by(user=user).all()
     data = []
     for check in checks:
         if check.checkoutTime:
