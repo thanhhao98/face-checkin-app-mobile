@@ -39,6 +39,29 @@ class User(db.Model):
     password = db.Column(db.String(80))
     pathToEmbedding = db.Column(db.String(512), unique=True, nullable=True)
     isAdmin = db.Column(db.Boolean)
+    checkHistory = db.relationship('CheckHistory', backref='user', lazy=True)
+
+class CheckHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    checkinTime = db.Column(db.DateTime, nullable=False)
+    checkoutTime = db.Column(db.DateTime, nullable=True)
+    userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+def checkinOnTime(timeNow):
+    if timeNow.hour < config['TIME_IN']['hour']:
+        return True
+    elif timeNow.hour == config['TIME_IN']['hour'] and timeNow.minute <= config['TIME_IN']['minute']:
+        return True
+    else:
+        return False
+
+def checkoutOnTime(timeNow):
+    if timeNow.hour > config['TIME_OUT']['hour']:
+        return True
+    elif timeNow.hour == config['TIME_OUT']['hour'] and timeNow.minute > config['TIME_OUT']['minute']:
+        return True
+    else:
+        return False
 
 def loadAllUserWithPath():
     users = User.query.all()
@@ -51,7 +74,6 @@ def loadAllUserWithPath():
     print(output)
     return output
 
-identifier = Identifier(loadAllUserWithPath())
 
 def userRequired(f):
     @wraps(f)
@@ -96,7 +118,11 @@ def createUser(currentUser):
         newUser = User(username=data.get('username'), email=data.get('email'), password=hashedPassword, isAdmin=False)
         db.session.add(newUser)
         db.session.commit()
-        return jsonify({'message': 'success'})
+        return jsonify({
+            'status': True,
+            'message': '',
+            'dat': []
+        })
 
 @app.route('/api/v1/addFaceUser', methods=['POST'])
 @adminRequired
@@ -145,7 +171,7 @@ def login():
     if not user:
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
     if check_password_hash(user.password, password):
-        token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=app.config['TOKEN_LIFE_TIME'] )}, app.config['SECRET_KEY'])
+        token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.now() + datetime.timedelta(minutes=app.config['TOKEN_LIFE_TIME'] )}, app.config['SECRET_KEY'])
         return jsonify({
             'status': True,
             'message': '',
@@ -160,24 +186,113 @@ def login():
 @userRequired
 def checkFace(currentUser):
     if request.method == 'POST':
+        identifier = Identifier(loadAllUserWithPath())
         filestr = request.files['face'].read()
         npimg = np.fromstring(filestr, np.uint8)
         img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
         feature = embedder.get_feature(img)
         index = identifier.process(feature)
-        r = {
-            'status': True,
-            'message': '',
-            'data': {
-                'isExist': True,
-                'index': index
+        if index == -1:
+            return jsonify({
+                'status': False,
+                'message': 'Cannot recognize user\'s face',
+                'data': []
+            })
+        check= CheckHistory.query.filter_by(userId=index, checkoutTime=None).first()
+        timeNow = datetime.datetime.now()
+        if check:
+            check.checkoutTime = timeNow
+            db.session.commit()
+            return jsonify({
+                'status': True,
+                'message': '',
+                'data': {
+                    'onTime': checkoutOnTime(timeNow),
+                    'checkoutTime':  timeNow,
+                    'index': index,
+                    'username': check.user.username
+                }
+            })
+        else:
+            check = CheckHistory(userId=index, checkinTime=timeNow)
+            db.session.add(check)
+            db.session.commit()
+            return jsonify({
+                'status': True,
+                'message': '',
+                'data': {
+                    'onTime': checkinOnTime(timeNow),
+                    'checkinTime':  timeNow,
+                    'index': index,
+                    'username': check.user.username
+                }
+            })
+
+@app.route('/api/v1/getCheckHistory', methods=['GET'])
+@userRequired
+def getHistoryOfUser(currentUser):
+    checks = CheckHistory.query.filter_by(user=currentUser).all()
+    data = []
+    for check in checks:
+        if check.checkoutTime:
+            checkoutRecord = {
+                'onTime': checkoutOnTime(check.checkoutTime),
+                'time': check.checkoutTime
             }
+        else:
+            checkoutRecord = None
+        record = {
+            'checkin': {
+                'onTime': checkinOnTime(check.checkinTime),
+                'time': check.checkinTime
+            },
+            'checkout': checkoutRecord
         }
-        return jsonify(r)
+        data.append(record)
+    return jsonify({
+        'status': True,
+        'message': '',
+        'data': data
+    })
+
+@app.route('/api/v1/getAllCheckHistory', methods=['GET'])
+@adminRequired
+def getHistoryOfAllUser(currentUser):
+    checks = CheckHistory.query.all()
+    data = []
+    for check in checks:
+        if check.checkoutTime:
+            checkoutRecord = {
+                'onTime': checkoutOnTime(check.checkoutTime),
+                'time': check.checkoutTime
+            }
+        else:
+            checkoutRecord = None
+        record = {
+            'userId': check.user.id,
+            'username': check.user.username,
+            'checkin': {
+                'onTime': checkinOnTime(check.checkinTime),
+                'time': check.checkinTime
+            },
+            'checkout': checkoutRecord
+        }
+        data.append(record)
+    return jsonify({
+        'status': True,
+        'message': '',
+        'data': data
+    })
+
 
 @app.route('/api/v1/test', methods=['GET'])
 def test():
-    db.create_all()
+    # db.create_all()
+    user = User.query.filter_by(id=1).first()
+    check = CheckHistory(user=user,checkinTime=datetime.datetime.now())
+    db.session.add(check)
+    db.session.commit()
+
     return 'ok'
 
 
