@@ -70,7 +70,6 @@ class ArcFace:
             flipped = cv2.flip(face, 1)
         # numpy to tensor
         if not all(self._input_size == i for i in img.shape[:2]):
-            print(f'reshape from {img.shape}')
             face = cv2.resize(face,(self._input_size, self._input_size))
         face = face.swapaxes(1, 2).swapaxes(0, 1)
         face = np.reshape(face, [1, 3, self._input_size, self._input_size])
