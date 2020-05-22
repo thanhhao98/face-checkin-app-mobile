@@ -1,11 +1,11 @@
 import numpy as np
 import cv2
 import torch
-import mxnet as mx
-import sklearn.preprocessing
+# import mxnet as mx
+# import sklearn.preprocessing
 import os
 
-from lib.arcface.model_irse import IR_50
+from core.lib.arcface.model_irse import IR_50
 
 
 def l2_norm(input, axis=1):
@@ -52,7 +52,7 @@ class ArcFace:
 
     def _get_model(self, model_path):
         self.model = IR_50([self._input_size, self._input_size])
-        self.model.load_state_dict(torch.load(model_path))
+        self.model.load_state_dict(torch.load(model_path, map_location='cpu'))
         self.model.to(self._device)
         self.model.eval()
 
@@ -69,6 +69,9 @@ class ArcFace:
         if tta:
             flipped = cv2.flip(face, 1)
         # numpy to tensor
+        if not all(self._input_size == i for i in img.shape[:2]):
+            print(f'reshape from {img.shape}')
+            face = cv2.resize(face,(self._input_size, self._input_size))
         face = face.swapaxes(1, 2).swapaxes(0, 1)
         face = np.reshape(face, [1, 3, self._input_size, self._input_size])
         face = np.array(face, dtype=np.float32)
@@ -92,3 +95,7 @@ class ArcFace:
                 emb_batch = self.model(face.to(self._device))
                 feature = l2_norm(emb_batch)
         return feature[0]
+
+    def dump_embedding(self, img, path):
+        feature = self.get_feature(img)
+        torch.save(feature, path)

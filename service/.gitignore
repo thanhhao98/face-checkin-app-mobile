@@ -8,3 +8,8 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+.DS_Store
+*.swp
+core/.DS_Store
+core/*.swp
+*.db
