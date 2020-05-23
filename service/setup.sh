@@ -2,7 +2,7 @@
 
 if [ ! -d "venv" ]; then
 	echo "Setup environment"
-	python3 -m pip venv venv
+	python3 -m venv venv
 	python3 -m pip install -r requirements.txt
 fi
 if [ -f "venv/bin/activate" ]; then
