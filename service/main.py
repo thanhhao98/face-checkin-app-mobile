@@ -1,4 +1,8 @@
 import numpy as np
+from io import BytesIO
+from PIL import Image
+import base64
+import json
 import time
 import os
 import cv2
@@ -16,6 +20,7 @@ from werkzeug.security import (
     generate_password_hash,
     check_password_hash
 )
+from core.detector import MTCNN
 from core.embedder import ArcFace
 from core.identifier import Identifier
 from config import config
@@ -29,6 +34,7 @@ app.config['PATH_DATA_FOLDERS'] = config['PATH_DATA_FOLDERS']
 app.config['NAME_FILE_EMBEDDING'] = config['NAME_FILE_EMBEDDING']
 
 embedder = ArcFace(config['PATH_ARCFACE_MODEL'])
+detector = MTCNN()
 
 db = SQLAlchemy(app)
 
@@ -40,6 +46,13 @@ class User(db.Model):
     pathToEmbedding = db.Column(db.String(512), unique=True, nullable=True)
     isAdmin = db.Column(db.Boolean)
     checkHistory = db.relationship('CheckHistory', backref='user', lazy=True)
+
+def readb64(base64_string):
+    sbuf =  BytesIO()
+    sbufout = base64.b64decode(base64_string)
+    sbuf.write(sbufout)
+    pimg = Image.open(sbuf)
+    return cv2.cvtColor(np.array(pimg), cv2.COLOR_RGB2BGR)
 
 class CheckHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -71,7 +84,6 @@ def loadAllUserWithPath():
             pathEmbedding =os.path.join(app.root_path,user.pathToEmbedding, app.config['NAME_FILE_EMBEDDING'])
             if os.path.isfile(pathEmbedding):
                 output[user.id] = pathEmbedding
-    print(output)
     return output
 
 
@@ -121,7 +133,7 @@ def createUser(currentUser):
         return jsonify({
             'status': True,
             'message': '',
-            'dat': []
+            'data': []
         })
 
 @app.route('/api/v1/addFaceUser', methods=['POST'])
@@ -174,6 +186,7 @@ def loginFace():
         user = User.query.filter_by(id=index).first()
         token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.now() + datetime.timedelta(minutes=app.config['TOKEN_LIFE_TIME'] )}, app.config['SECRET_KEY'])
         return jsonify({
+
             'status': True,
             'message': '',
             'data':{
@@ -182,6 +195,11 @@ def loginFace():
             }
         })
 
+@app.route('/testRecive', methods=['POST'])
+def testRecive():
+    data = request.get_json()['data']['base64']
+    img = readb64(data)
+    return 'ok'
 
 @app.route('/api/v1/login', methods=['POST'])
 def login():
@@ -205,15 +223,29 @@ def login():
     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
 @app.route('/api/v1/checkFace', methods=['POST'])
-@userRequired
-def checkFace(currentUser):
+# @userRequired
+def checkFace():
     if request.method == 'POST':
+        start = time.time()
         identifier = Identifier(loadAllUserWithPath())
-        filestr = request.files['face'].read()
-        npimg = np.fromstring(filestr, np.uint8)
-        img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
-        feature = embedder.get_feature(img)
+        data = request.get_json()['data']['base64']
+        img = readb64(data)
+        bbox, face = detector.align(img)
+        if face is None:
+            return jsonify({
+                'status': False,
+                'message': 'There are no face in image',
+                'data': []
+            })
+        rgb = np.array(face)[..., ::-1]
+        # filestr = request.files['face'].read()
+        # npimg = np.fromstring(filestr, np.uint8)
+        # img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+        feature = embedder.get_feature(rgb)
         index = identifier.process(feature)
+        print()
+        print()
+        print(index)
         if index == -1:
             return jsonify({
                 'status': False,
@@ -225,6 +257,7 @@ def checkFace(currentUser):
         if check:
             check.checkoutTime = timeNow
             db.session.commit()
+            print(time.time()-start)
             return jsonify({
                 'status': True,
                 'message': '',
@@ -239,6 +272,7 @@ def checkFace(currentUser):
             check = CheckHistory(userId=index, checkinTime=timeNow)
             db.session.add(check)
             db.session.commit()
+            print(time.time()-start)
             return jsonify({
                 'status': True,
                 'message': '',
@@ -355,4 +389,4 @@ def test():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')

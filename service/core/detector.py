@@ -2,14 +2,14 @@ import numpy as np
 import torch
 from PIL import Image
 from torch.autograd import Variable
-from lib.mtcnn_pytorch.src.get_nets import PNet, RNet, ONet
-from lib.mtcnn_pytorch.src.box_utils import nms, calibrate_box, get_image_boxes, convert_to_square
-from lib.mtcnn_pytorch.src.first_stage import run_first_stage
-from lib.mtcnn_pytorch.src.align_trans import get_reference_facial_points, warp_and_crop_face
+from core.lib.mtcnn_pytorch.src.get_nets import PNet, RNet, ONet
+from core.lib.mtcnn_pytorch.src.box_utils import nms, calibrate_box, get_image_boxes, convert_to_square
+from core.lib.mtcnn_pytorch.src.first_stage import run_first_stage
+from core.lib.mtcnn_pytorch.src.align_trans import get_reference_facial_points, warp_and_crop_face
 
 
 class MTCNN():
-    def __init__(self, weight_path='lib/mtcnn_pytorch/src/weights'):
+    def __init__(self, weight_path='core/lib/mtcnn_pytorch/src/weights'):
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
         self.pnet = PNet(weight_path).to(self.device)
