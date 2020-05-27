@@ -39,16 +39,6 @@ export function DrawerContent(props){
                     <Drawer.Section style={styles.drawerSection}>
                       <DrawerItem 
                         icon={({color, size})=>(
-                          <Icon name="home"
-                          color={color}
-                          size={size}
-                          />
-                        )}
-                        label="Home"
-                        onPress={()=>{props.navigation.navigate('Home')}}
-                      />
-                      <DrawerItem 
-                        icon={({color, size})=>(
                           <Icon name="camera"
                           color={color}
                           size={size}
@@ -77,7 +67,24 @@ export function DrawerContent(props){
                         label="History"
                         onPress={()=>{props.navigation.navigate('History')}}
                       />
+                      <DrawerItem 
+                        icon={({color, size})=>(
+                          <Icon name="history"
+                          color={color}
+                          size={size}
+                          />
+                        )}
+                        label="Manage User"
+                        onPress={()=>{props.navigation.navigate('ManageUser')}}
+                      />
+                      {/* <DrawerItem
+                        label="Open drawer"
+                        onPress={() => props.navigation.openDrawer()}
+                      /> */}
                     </Drawer.Section>
+
+                    
+                    
                    
                 </View>
             </DrawerContentScrollView>
