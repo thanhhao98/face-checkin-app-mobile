@@ -1,8 +1,12 @@
 import React from 'react';
 import { StyleSheet, View, Text , FlatList} from 'react-native';
-import { Title } from 'react-native-paper';
+import { Title, Button } from 'react-native-paper';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import DatePicker from 'react-native-datepicker';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { Header } from 'react-native/Libraries/NewAppScreen';
+
+// import { Icon } from 'react-native-paper/lib/typescript/src/components/Avatar/Avatar';
 
 
 export default class HistoryScreen extends React.Component {
@@ -12,6 +16,7 @@ export default class HistoryScreen extends React.Component {
         this.state = {
             date: '15-05-2018',
             data: [
+                // {checkin: '27-3-2020 08:31', checkout: '27-3-2020 08:31'},
                 {date: '27-3-2020 08:31', status: 'check-in'},
                 {date: '27-3-2020 17:31', status: 'check-out'},
                 {date: '28-3-2020 08:30', status: 'check-in'},
@@ -35,9 +40,11 @@ export default class HistoryScreen extends React.Component {
     render() {
         return (
             <View style={styles.container}>
-                <View style={{ alignSelf: "stretch", marginTop:25, marginBottom: 30, backgroundColor: "#4179f7" }}>
+               
+                
+                {/* <View style={{ alignSelf: "stretch", marginTop:25, marginBottom: 30, backgroundColor: "#4179f7" }}>
                     <Title style={{ marginTop:25, marginLeft:40, marginBottom: 30, color: 'white'}}>Manage History</Title>
-                </View>
+                </View> */}
 
             {/* <View style={styles.headerContainer}>
                 <View style={styles.inputContainer}>
@@ -47,7 +54,7 @@ export default class HistoryScreen extends React.Component {
             </View> */}
 
             <DatePicker
-                style={{ width: 200 }}
+                style={{ width: 200, marginTop:25 }}
                 date={this.state.date} //initial date from state
                 mode="date" //The enum of date, datetime and time
                 placeholder="select date"
@@ -68,6 +75,9 @@ export default class HistoryScreen extends React.Component {
                     },
                 }}
                 onDateChange={date => {
+                    console.log(date,'aaaaaaaaaaaaaaaaa');
+                    //post api backend -> data 
+                    // setState data
                     this.setState({ date: date });
                 }}
             />
