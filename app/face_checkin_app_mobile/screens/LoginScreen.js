@@ -1,13 +1,12 @@
 import React from 'react';
-import { StyleSheet, View, Text, TextInput} from 'react-native';
+import { StyleSheet, View, Text, TextInput, StatusBar} from 'react-native';
 import { Title, Paragraph, Button } from 'react-native-paper';
 
 function LoginScreen({ navigation }) {
     return (
         <View style={styles.container}>
-            <View style={styles.up}>
-                <Text style={styles.title}>Login</Text>
-            </View>
+    
+            <StatusBar barStyle = "dark-content" hidden = {false} backgroundColor = "#0a4ff0" translucent = {true}/>
             <View style={styles.down}>
                 <Title>Sign In</Title>
                 <Paragraph> Hi there! Nice to see you again.</Paragraph>
