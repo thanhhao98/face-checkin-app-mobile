@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import * as React from 'react';
-import { Button, View, StatusBar } from 'react-native';
+import { Button, View, AsyncStorage } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
@@ -129,11 +129,34 @@ const ManageUserStackScreen = ({ navigation }) => (
   </Stack.Navigator>
 );
 
-const App=()=> {
-
+// const App=()=> {
+class App extends React.Component {
+  constructor () {
+    super();
+    this.state={
+      isLogin: true,
+      isAdmin: false
+    }
+  }
+  render() {
+    const checkAccount = async () => {
+      let isAdmin = '';
+      try {
+        isAdmin = await AsyncStorage.getItem('isAdmin') || 'none';
+        if(isAdmin === 'true'){
+          this.setState({isAdmin:true,isLogin:true})
+        }
+      } catch (error) {
+        // Error retrieving data
+        console.log(error.message);
+      }
+      console.log(isAdmin)
+      return isAdmin;
+    }
+    console.log(checkAccount)
   return (
     <NavigationContainer>
-      <Drawer.Navigator initialRouteName="Checkin" drawerContent={props => <DrawerContent {...props}/>}>
+      <Drawer.Navigator initialRouteName="Checkin" drawerContent={props => <DrawerContent isLogin={this.state.isLogin} isAdmin={this.state.isAdmin}{...props}/>}>
         <Drawer.Screen name="Login" component={LoginStackScreen} />
         <Drawer.Screen name="Checkin" component={CheckinStackScreen} />
         <Drawer.Screen name="History" component={HistoryStackScreen} />
@@ -142,6 +165,7 @@ const App=()=> {
       </Drawer.Navigator>
     </NavigationContainer>
   );
+  }
 }
 export default App;
 
