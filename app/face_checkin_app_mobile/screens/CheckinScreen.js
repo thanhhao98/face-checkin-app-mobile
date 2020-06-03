@@ -74,7 +74,7 @@ export default class CheckinScreen extends React.Component {
       this.setState({image:data.uri})
       // console.log(data);
       //api post image -> backend
-      fetch("http://192.168.0.20:5000/api/v1/checkFace",{
+      fetch("http://192.168.0.20:5000/testRecive",{
         method:"POST",
         headers: {
          'Content-Type': 'application/json'
