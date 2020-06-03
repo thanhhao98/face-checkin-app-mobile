@@ -86,6 +86,17 @@ def loadAllUserWithPath():
                 output[user.id] = pathEmbedding
     return output
 
+def checkConstraint(face, multi_faces_flag):
+    """
+    Returns: error, errorMsg
+    """
+    # No face
+    if face is None:
+        return True, 'There are no face in image'
+    # warning if >1 face
+    if multi_faces_flag:
+        return True, 'There are more than 1 face'
+    return False, ''
 
 def userRequired(f):
     @wraps(f)
@@ -151,8 +162,9 @@ def createUser(currentUser):
 @app.route('/api/v1/addFaceUser', methods=['POST'])
 @adminRequired
 def addFaceUser(currentUser):
+
     if request.method == 'POST':
-        userId = request.form.get('userId')
+        userId = request.json['data']['userId']
         user = User.query.filter_by(id=userId).first()
         if not user:
             return jsonify({
@@ -160,10 +172,13 @@ def addFaceUser(currentUser):
                 'message': 'User id is not exist',
                 'data': []
             })
-        filestr = request.files['face'].read()
-        npimg = np.fromstring(filestr, np.uint8)
-        #TODO: load img from base64
-        img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+        data = request.json['data']['base64']
+        img = readb64(data)
+        bbox, face, multi_faces_flag = detector.align(img)
+        error, errorMsg = checkConstraint(face, multi_faces_flag)
+        if error:
+            return jsonify({'status': False, 'message': errorMsg, 'data': []})
+        img = np.array(face)[..., ::-1]
         nameFolder = user.username
         if user.pathToEmbedding:
             subPath = user.pathToEmbedding
@@ -229,19 +244,28 @@ def testRecive():
 
 @app.route('/api/v1/login', methods=['POST'])
 def login():
-    username = request.form.get('username')
-    password = request.form.get('password')
+    try:
+        username = request.json['data']['username']
+        password = request.json['data']['password']
+    except Exception as e:
+        return jsonify({
+            'status': False,
+            'message': repr(e),
+            'data': {}
+        })
     if not username or not password:
-        #TODO: return jsonify
-        return make_response(
-            'Could not verify', 401,
-            {'WWW-Authenticate': 'Basic realm="Login required!"'})
+        return jsonify({
+            'status': False,
+            'message': 'Username or password is empty string',
+            'data': {}
+        })
     user = User.query.filter_by(username=username).first()
     if not user:
-        #TODO: return jsonify
-        return make_response(
-            'Could not verify', 401,
-            {'WWW-Authenticate': 'Basic realm="Login required!"'})
+        return jsonify({
+            'status': False,
+            'message': 'Username not existed',
+            'data': {}
+        })
     if check_password_hash(user.password, password):
         token = jwt.encode(
             {
@@ -256,29 +280,19 @@ def login():
             'message': '',
             'data': {
                 'isAdmin': user.isAdmin,
+                'username': user.username,
                 'token': token.decode('UTF-8'),
             }
         })
-    #TODO: return jsonify
-    return make_response('Could not verify', 401,
-                         {'WWW-Authenticate': 'Basic realm="Login required!"'})
-
+    return jsonify({
+        'status': False,
+        'message': 'Password is not correct',
+        'data': {}
+    })
 
 @app.route('/api/v1/checkFace', methods=['POST'])
 # @userRequired
 def checkFace():
-    def checkConstraint(face, multi_faces_flag):
-        """
-        Returns: error, errorMsg
-        """
-        # No face
-        if face is None:
-            return True, 'There are no face in image'
-        # warning if >1 face
-        if multi_faces_flag:
-            return True, 'There are more than 1 face'
-        return False, ''
-
     if request.method == 'POST':
         start = time.time()
         identifier = Identifier(loadAllUserWithPath())
