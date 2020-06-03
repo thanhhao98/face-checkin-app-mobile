@@ -82,8 +82,7 @@ export default class HistoryScreen extends React.Component {
                 }}
             />
 
-            
-
+               
             <FlatList
                 style={styles.list}
                 const data = {this.state.data}
