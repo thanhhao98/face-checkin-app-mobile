@@ -17,9 +17,8 @@ class Identifier():
             if cos_sim > max_value:
                 max_value = cos_sim
                 index = i
-        print(max_value)
-        print(index)
-        print('afadfadfasdfa')
+        # print(max_value)
+        # print(index)
         if max_value < self.threshold:
             index = -1
         return index

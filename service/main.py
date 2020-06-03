@@ -8,23 +8,14 @@ import os
 import cv2
 import jwt
 import datetime
-from flask import (
-    Flask,
-    make_response,
-    request,
-    jsonify
-)
+from flask import (Flask, make_response, request, jsonify)
 from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import (
-    generate_password_hash,
-    check_password_hash
-)
+from werkzeug.security import (generate_password_hash, check_password_hash)
 from core.detector import MTCNN
 from core.embedder import ArcFace
 from core.identifier import Identifier
 from config import config
-
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = config['SECRET_KEY']
@@ -38,6 +29,7 @@ detector = MTCNN()
 
 db = SQLAlchemy(app)
 
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -47,12 +39,14 @@ class User(db.Model):
     isAdmin = db.Column(db.Boolean)
     checkHistory = db.relationship('CheckHistory', backref='user', lazy=True)
 
+
 def readb64(base64_string):
-    sbuf =  BytesIO()
+    sbuf = BytesIO()
     sbufout = base64.b64decode(base64_string)
     sbuf.write(sbufout)
     pimg = Image.open(sbuf)
     return cv2.cvtColor(np.array(pimg), cv2.COLOR_RGB2BGR)
+
 
 class CheckHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -60,28 +54,34 @@ class CheckHistory(db.Model):
     checkoutTime = db.Column(db.DateTime, nullable=True)
     userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
+
 def checkinOnTime(timeNow):
     if timeNow.hour < config['TIME_IN']['hour']:
         return True
-    elif timeNow.hour == config['TIME_IN']['hour'] and timeNow.minute <= config['TIME_IN']['minute']:
+    elif timeNow.hour == config['TIME_IN'][
+            'hour'] and timeNow.minute <= config['TIME_IN']['minute']:
         return True
     else:
         return False
 
+
 def checkoutOnTime(timeNow):
     if timeNow.hour > config['TIME_OUT']['hour']:
         return True
-    elif timeNow.hour == config['TIME_OUT']['hour'] and timeNow.minute > config['TIME_OUT']['minute']:
+    elif timeNow.hour == config['TIME_OUT'][
+            'hour'] and timeNow.minute > config['TIME_OUT']['minute']:
         return True
     else:
         return False
+
 
 def loadAllUserWithPath():
     users = User.query.all()
     output = {}
     for user in users:
         if user.pathToEmbedding:
-            pathEmbedding =os.path.join(app.root_path,user.pathToEmbedding, app.config['NAME_FILE_EMBEDDING'])
+            pathEmbedding = os.path.join(app.root_path, user.pathToEmbedding,
+                                         app.config['NAME_FILE_EMBEDDING'])
             if os.path.isfile(pathEmbedding):
                 output[user.id] = pathEmbedding
     return output
@@ -94,14 +94,18 @@ def userRequired(f):
         if 'x-access-token' in request.headers:
             token = request.headers['x-access-token']
         if not token:
-            return jsonify({'message': 'Token is missing!, Login required'}), 401
+            return jsonify({'message':
+                            'Token is missing!, Login required'}), 401
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'])
             currentUser = User.query.filter_by(id=data['id']).first()
         except Exception as e:
-            return jsonify({'message': 'Token is not valid!, Login required'}), 401
+            return jsonify({'message':
+                            'Token is not valid!, Login required'}), 401
         return f(currentUser, *args, **kwargs)
+
     return decorated
+
 
 def adminRequired(f):
     @wraps(f)
@@ -110,31 +114,39 @@ def adminRequired(f):
         if 'x-access-token' in request.headers:
             token = request.headers['x-access-token']
         if not token:
-            return jsonify({'message': 'Token is missing!, Login required'}), 401
+            return jsonify({'message':
+                            'Token is missing!, Login required'}), 401
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'])
             currentUser = User.query.filter_by(id=data['id']).first()
             if not currentUser.isAdmin:
-                return jsonify({'message': 'Current user has no permission get this funcion!, Login required'}), 401
+                return jsonify({
+                    'message':
+                    'Current user has no permission get this funcion!, Login required'
+                }), 401
         except Exception as e:
-            return jsonify({'message': 'Token is not valid!, Login required'}), 401
+            return jsonify({'message':
+                            'Token is not valid!, Login required'}), 401
         return f(currentUser, *args, **kwargs)
+
     return decorated
+
 
 @app.route('/api/v1/createUser', methods=['POST'])
 @adminRequired
 def createUser(currentUser):
     if request.method == 'POST':
         data = request.form
-        hashedPassword = generate_password_hash(data.get('password'), method='sha256')
-        newUser = User(username=data.get('username'), email=data.get('email'), password=hashedPassword, isAdmin=False)
+        hashedPassword = generate_password_hash(data.get('password'),
+                                                method='sha256')
+        newUser = User(username=data.get('username'),
+                       email=data.get('email'),
+                       password=hashedPassword,
+                       isAdmin=False)
         db.session.add(newUser)
         db.session.commit()
-        return jsonify({
-            'status': True,
-            'message': '',
-            'data': []
-        })
+        return jsonify({'status': True, 'message': '', 'data': []})
+
 
 @app.route('/api/v1/addFaceUser', methods=['POST'])
 @adminRequired
@@ -150,27 +162,31 @@ def addFaceUser(currentUser):
             })
         filestr = request.files['face'].read()
         npimg = np.fromstring(filestr, np.uint8)
+        #TODO: load img from base64
         img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
         nameFolder = user.username
         if user.pathToEmbedding:
             subPath = user.pathToEmbedding
         else:
-            subPath = os.path.join(app.config['PATH_DATA_FOLDERS'], user.username)
+            subPath = os.path.join(app.config['PATH_DATA_FOLDERS'],
+                                   user.username)
             user.pathToEmbedding = subPath
             db.session.commit()
-        pathEmbedding = os.path.join(app.root_path,subPath)
+        pathEmbedding = os.path.join(app.root_path, subPath)
         if not os.path.isdir(pathEmbedding):
             os.makedirs(pathEmbedding)
-        pathImage = os.path.join(pathEmbedding, str(round(time.time()*100))+'.jpg')
+        pathImage = os.path.join(pathEmbedding,
+                                 str(round(time.time() * 100)) + '.jpg')
         cv2.imwrite(pathImage, img)
-        pathEmbedding = os.path.join(pathEmbedding, app.config['NAME_FILE_EMBEDDING'])
-        print(pathEmbedding)
+        pathEmbedding = os.path.join(pathEmbedding,
+                                     app.config['NAME_FILE_EMBEDDING'])
         embedder.dump_embedding(img, pathEmbedding)
         return jsonify({
             'status': True,
             'message': 'Add face for user successfully',
             'data': []
         })
+
 
 @app.route('/api/v1/loginWithFace', methods=['POST'])
 def loginFace():
@@ -181,19 +197,28 @@ def loginFace():
     feature = embedder.get_feature(img)
     index = identifier.process(feature)
     if index == -1:
-        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+        return make_response(
+            'Could not verify', 401,
+            {'WWW-Authenticate': 'Basic realm="Login required!"'})
     else:
         user = User.query.filter_by(id=index).first()
-        token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.now() + datetime.timedelta(minutes=app.config['TOKEN_LIFE_TIME'] )}, app.config['SECRET_KEY'])
+        token = jwt.encode(
+            {
+                'id':
+                user.id,
+                'exp':
+                datetime.datetime.now() +
+                datetime.timedelta(minutes=app.config['TOKEN_LIFE_TIME'])
+            }, app.config['SECRET_KEY'])
         return jsonify({
-
             'status': True,
             'message': '',
-            'data':{
+            'data': {
                 'isAdmin': user.isAdmin,
-                'token' : token.decode('UTF-8'),
+                'token': token.decode('UTF-8'),
             }
         })
+
 
 @app.route('/testRecive', methods=['POST'])
 def testRecive():
@@ -201,69 +226,94 @@ def testRecive():
     img = readb64(data)
     return 'ok'
 
+
 @app.route('/api/v1/login', methods=['POST'])
 def login():
     username = request.form.get('username')
     password = request.form.get('password')
     if not username or not password:
-        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+        #TODO: return jsonify
+        return make_response(
+            'Could not verify', 401,
+            {'WWW-Authenticate': 'Basic realm="Login required!"'})
     user = User.query.filter_by(username=username).first()
     if not user:
-        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+        #TODO: return jsonify
+        return make_response(
+            'Could not verify', 401,
+            {'WWW-Authenticate': 'Basic realm="Login required!"'})
     if check_password_hash(user.password, password):
-        token = jwt.encode({'id' : user.id, 'exp' : datetime.datetime.now() + datetime.timedelta(minutes=app.config['TOKEN_LIFE_TIME'] )}, app.config['SECRET_KEY'])
+        token = jwt.encode(
+            {
+                'id':
+                user.id,
+                'exp':
+                datetime.datetime.now() +
+                datetime.timedelta(minutes=app.config['TOKEN_LIFE_TIME'])
+            }, app.config['SECRET_KEY'])
         return jsonify({
             'status': True,
             'message': '',
-            'data':{
+            'data': {
                 'isAdmin': user.isAdmin,
-                'token' : token.decode('UTF-8'),
+                'token': token.decode('UTF-8'),
             }
         })
-    return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+    #TODO: return jsonify
+    return make_response('Could not verify', 401,
+                         {'WWW-Authenticate': 'Basic realm="Login required!"'})
+
 
 @app.route('/api/v1/checkFace', methods=['POST'])
 # @userRequired
 def checkFace():
+    def checkConstraint(face, multi_faces_flag):
+        """
+        Returns: error, errorMsg
+        """
+        # No face
+        if face is None:
+            return True, 'There are no face in image'
+        # warning if >1 face
+        if multi_faces_flag:
+            return True, 'There are more than 1 face'
+        return False, ''
+
     if request.method == 'POST':
         start = time.time()
         identifier = Identifier(loadAllUserWithPath())
-        data = request.get_json()['data']['base64']
+        data = request.json['data']['base64']
         img = readb64(data)
-        bbox, face = detector.align(img)
-        if face is None:
-            return jsonify({
-                'status': False,
-                'message': 'There are no face in image',
-                'data': []
-            })
+        bbox, face, multi_faces_flag = detector.align(img)
+        error, errorMsg = checkConstraint(face, multi_faces_flag)
+        if error:
+            return jsonify({'status': False, 'message': errorMsg, 'data': []})
         rgb = np.array(face)[..., ::-1]
         # filestr = request.files['face'].read()
         # npimg = np.fromstring(filestr, np.uint8)
         # img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
         feature = embedder.get_feature(rgb)
         index = identifier.process(feature)
-        print()
-        print()
-        print(index)
+        # print(index)
         if index == -1:
             return jsonify({
                 'status': False,
                 'message': 'Cannot recognize user\'s face',
                 'data': []
             })
-        check= CheckHistory.query.filter_by(userId=index, checkoutTime=None).first()
+        check = CheckHistory.query.filter_by(userId=index,
+                                             checkoutTime=None).first()
         timeNow = datetime.datetime.now()
         if check:
             check.checkoutTime = timeNow
             db.session.commit()
-            print(time.time()-start)
+            print(time.time() - start)
             return jsonify({
                 'status': True,
                 'message': '',
                 'data': {
                     'onTime': checkoutOnTime(timeNow),
-                    'checkoutTime':  timeNow,
+                    'checkoutTime': timeNow,
                     'index': index,
                     'username': check.user.username
                 }
@@ -272,17 +322,18 @@ def checkFace():
             check = CheckHistory(userId=index, checkinTime=timeNow)
             db.session.add(check)
             db.session.commit()
-            print(time.time()-start)
+            print(time.time() - start)
             return jsonify({
                 'status': True,
                 'message': '',
                 'data': {
                     'onTime': checkinOnTime(timeNow),
-                    'checkinTime':  timeNow,
+                    'checkinTime': timeNow,
                     'index': index,
                     'username': check.user.username
                 }
             })
+
 
 @app.route('/api/v1/getCheckHistory', methods=['GET'])
 @userRequired
@@ -305,11 +356,8 @@ def getHistoryOfUser(currentUser):
             'checkout': checkoutRecord
         }
         data.append(record)
-    return jsonify({
-        'status': True,
-        'message': '',
-        'data': data
-    })
+    return jsonify({'status': True, 'message': '', 'data': data})
+
 
 @app.route('/api/v1/getAllCheckHistory', methods=['GET'])
 @adminRequired
@@ -334,11 +382,8 @@ def getHistoryOfAllUser(currentUser):
             'checkout': checkoutRecord
         }
         data.append(record)
-    return jsonify({
-        'status': True,
-        'message': '',
-        'data': data
-    })
+    return jsonify({'status': True, 'message': '', 'data': data})
+
 
 @app.route('/api/v1/getCheckHistoryWithUserId/<userId>', methods=['GET'])
 @adminRequired
@@ -370,18 +415,14 @@ def getHistoryUserWithId(currentUser, userId):
             'checkout': checkoutRecord
         }
         data.append(record)
-    return jsonify({
-        'status': True,
-        'message': '',
-        'data': data
-    })
+    return jsonify({'status': True, 'message': '', 'data': data})
 
 
 @app.route('/api/v1/test', methods=['GET'])
 def test():
     # db.create_all()
     user = User.query.filter_by(id=1).first()
-    check = CheckHistory(user=user,checkinTime=datetime.datetime.now())
+    check = CheckHistory(user=user, checkinTime=datetime.datetime.now())
     db.session.add(check)
     db.session.commit()
 
