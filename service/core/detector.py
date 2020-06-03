@@ -23,6 +23,7 @@ class MTCNN():
     def align(self, frame):
         img = Image.fromarray(frame[..., ::-1])
         boxes, landmarks = self.detect_faces(img)
+        multi_faces_flag = True if len(boxes) > 1 else False
 
         # Early return for no faces case
         if landmarks is None:
@@ -36,7 +37,7 @@ class MTCNN():
                                          facial5points,
                                          self.refrence,
                                          crop_size=(112, 112))
-        return boxes[0], Image.fromarray(warped_face)
+        return boxes[0], Image.fromarray(warped_face), multi_faces_flag
 
     def align_multi(self, img, limit=None, min_face_size=30.0):
         boxes, landmarks = self.detect_faces(img, min_face_size)
