@@ -171,7 +171,6 @@ class Backbone(Module):
         x = self.input_layer(x)
         x = self.body(x)
         x = self.output_layer(x)
-        print(type(x))
         return x
 
     def _initialize_weights(self):
