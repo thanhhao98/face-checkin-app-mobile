@@ -87,7 +87,7 @@ def loadAllUserWithPath():
     return output
 
 
-def checkConstraint(face, multi_faces_flag):
+def checkConstraint(bboxes, face):
     """
     Returns: error, errorMsg
     """
@@ -95,7 +95,7 @@ def checkConstraint(face, multi_faces_flag):
     if face is None:
         return True, 'There are no face in image'
     # warning if >1 face
-    if multi_faces_flag:
+    if len(bboxes) > 1:
         return True, 'There are more than 1 face'
     return False, ''
 
@@ -181,10 +181,10 @@ def addFaceUser(currentUser):
             })
         data = request.json['data']['base64']
         img = readb64(data)
-        bbox, face, multi_faces_flag = detector.align(img)
-        error, errorMsg = checkConstraint(face, multi_faces_flag)
+        bboxes, face = detector.align(img)
+        error, errorMsg = checkConstraint(bboxes, face)
         if error:
-            return jsonify({'status': False, 'message': errorMsg, 'data': []})
+            return jsonify({'status': False, 'message': errorMsg, 'data': {'bboxes': bboxes.tolist()}})
         img = np.array(face)[..., ::-1]
         nameFolder = user.username
         if user.pathToEmbedding:
@@ -206,7 +206,7 @@ def addFaceUser(currentUser):
         return jsonify({
             'status': True,
             'message': 'Add face for user successfully',
-            'data': []
+            'data': {'bbox': bboxes[0].tolist()}
         })
 
 
@@ -313,10 +313,10 @@ def checkFace():
         identifier = Identifier(loadAllUserWithPath())
         data = request.json['data']['base64']
         img = readb64(data)
-        bbox, face, multi_faces_flag = detector.align(img)
-        error, errorMsg = checkConstraint(face, multi_faces_flag)
+        bboxes, face = detector.align(img)
+        error, errorMsg = checkConstraint(bboxes, face)
         if error:
-            return jsonify({'status': False, 'message': errorMsg, 'data': []})
+            return jsonify({'status': False, 'message': errorMsg, 'data': {'bboxes': bboxes.tolist()}})
         rgb = np.array(face)[..., ::-1]
         # filestr = request.files['face'].read()
         # npimg = np.fromstring(filestr, np.uint8)
@@ -335,7 +335,7 @@ def checkFace():
         if check:
             check.checkoutTime = timeNow
             db.session.commit()
-            print(time.time() - start)
+            # print(time.time() - start)
             return jsonify({
                 'status': True,
                 'message': '',
@@ -343,14 +343,15 @@ def checkFace():
                     'onTime': checkoutOnTime(timeNow),
                     'checkoutTime': timeNow,
                     'index': index,
-                    'username': check.user.username
+                    'username': check.user.username,
+                    'bbox': bboxes[0].tolist()
                 }
             })
         else:
             check = CheckHistory(userId=index, checkinTime=timeNow)
             db.session.add(check)
             db.session.commit()
-            print(time.time() - start)
+            # print(time.time() - start)
             return jsonify({
                 'status': True,
                 'message': '',
@@ -358,7 +359,8 @@ def checkFace():
                     'onTime': checkinOnTime(timeNow),
                     'checkinTime': timeNow,
                     'index': index,
-                    'username': check.user.username
+                    'username': check.user.username,
+                    'bbox': bboxes[0].tolist()
                 }
             })
 
