@@ -1,26 +1,43 @@
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity, Text, StatusBar, Image } from 'react-native';
+import {
+	StyleSheet,
+	View,
+	TouchableOpacity,
+	Text,
+	StatusBar,
+	Image,
+	Animated
+} from 'react-native';
 import {RNCamera}  from 'react-native-camera';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { max } from 'react-native-reanimated';
 import { IconButton } from 'react-native-paper';
+import { ProgressBar, Colors  } from 'react-native-paper';
 
 export default class CheckinScreen extends React.Component {
   constructor() {
     super();
     this.state={
-      image:''
+			progressBar: false,
+      image:'',
+			cameraIsOn: true,
     }
   }
+	toggleCamera() {
+		this.setState({
+			cameraIsOn: !this.state.cameraIsOn
+		})
+	}
   render() {
     return (
       <View style={styles.container}>
-      <StatusBar barStyle = "dark-content" hidden = {false} backgroundColor = "#0a4ff0" translucent = {true}/>
-        <RNCamera
+				<StatusBar barStyle = "dark-content" hidden = {false} backgroundColor = "#0a4ff0" translucent = {true}/>
+				{this.state.cameraIsOn ? (
+	        <RNCamera
           ref={ref => {
             this.camera = ref;
           }}
-          style={styles.preview}
+						style={[styles.preview, { transform: [{rotateY: '180deg'}]  }]}
           type={RNCamera.Constants.Type.front}
           flashMode={RNCamera.Constants.FlashMode.on}
           androidCameraPermissionOptions={{
@@ -29,17 +46,19 @@ export default class CheckinScreen extends React.Component {
             buttonPositive: 'Ok',
             buttonNegative: 'Cancel',
           }}
-          androidRecordAudioPermissionOptions={{
-            title: 'Permission to use audio recording',
-            message: 'We need your permission to use your audio',
-            buttonPositive: 'Ok',
-            buttonNegative: 'Cancel',
-          }}
-          onGoogleVisionBarcodesDetected={({ barcodes }) => {
-            console.log(barcodes);
-          }}
-        />
-        
+					/>
+				): (
+          <Image
+						style={styles.preview}
+            source={{
+              uri: this.state.image,
+            }}
+          /> 
+				)}
+				<View>
+					<ProgressBar indeterminate={true} progress={0.5} visible={this.state.progressBar}/>
+				</View>
+				        
         <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
           <TouchableOpacity 
             onPress={this.takePicture.bind(this)} style={styles.capture}>
@@ -56,12 +75,7 @@ export default class CheckinScreen extends React.Component {
             <Text>Checkin Success</Text>
             <Text>Time chekcin: 8:00/1111</Text>
           </View>
-          <Image
-            style={{ width:100, height:100 }}
-            source={{
-              uri: this.state.image,
-            }}
-          />     
+    
         </View>
       </View>
     );
@@ -71,24 +85,30 @@ export default class CheckinScreen extends React.Component {
     if (this.camera) {
       const options = { quality: 0.5, base64: true};
       const data = await this.camera.takePictureAsync(options);
+			this.setState({progressBar: true})
       this.setState({image:data.uri})
-      // console.log(data);
-      //api post image -> backend
-      fetch("http://192.168.0.20:5000/testRecive",{
-        method:"POST",
+			this.toggleCamera()
+			console.log('ok')
+			let res = await fetch("http://192.168.20.81:5000/api/v1/checkFace", {
+				method: 'POST',
         headers: {
-         'Content-Type': 'application/json'
-       },
-       body:JSON.stringify({
-         "data":data,
-         
-       })
-      })
-      .then(res=>{
-        res.json();
-        console.log(res.json)
-      })
-    }
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+        },
+				body: JSON.stringify({
+					'data': data,
+				})
+			})
+			console.log('ok1')
+			let response = await res.json();
+			console.log('ok2')
+			console.log(response)
+			this.setState({progressBar: false})
+			console.log('done')
+		} else {
+			this.setState({progressBar: false})
+			this.toggleCamera()
+		}
   };
 
 }
@@ -115,5 +135,5 @@ const styles = StyleSheet.create({
     borderRadius:40, 
     backgroundColor:'#0a4ff0',
     opacity:0.3
-  },
+  }
 });
