@@ -10,7 +10,7 @@ fi
 if [ -f "venv/bin/activate" ]; then
 	echo "Loading Python vitualenvl from folder venv"
 	source venv/bin/activate
-	python3 -m pp install pip --upgrade
+	python3 -m pip install pip --upgrade
 else
 	echo "Folder venv is error, please check it!"
 fi
