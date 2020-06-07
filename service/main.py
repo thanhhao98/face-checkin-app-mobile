@@ -182,6 +182,9 @@ def addFaceUser(currentUser):
         data = request.json['data']['base64']
         img = readb64(data)
         bboxes, face = detector.align(img)
+        if bboxes is None:
+            return jsonify({'status': False, 'message': 'There are no face', 'data': {}})
+
         error, errorMsg = checkConstraint(bboxes, face)
         if error:
             return jsonify({'status': False, 'message': errorMsg, 'data': {'bboxes': bboxes.tolist()}})
@@ -314,6 +317,8 @@ def checkFace():
         data = request.json['data']['base64']
         img = readb64(data)
         bboxes, face = detector.align(img)
+        if bboxes is None:
+            return jsonify({'status': False, 'message': 'There are no face', 'data': {}})
         error, errorMsg = checkConstraint(bboxes, face)
         if error:
             return jsonify({'status': False, 'message': errorMsg, 'data': {'bboxes': bboxes.tolist()}})
