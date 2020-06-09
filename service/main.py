@@ -86,7 +86,8 @@ def loadAllUserWithPath():
                 output[user.id] = pathEmbedding
     return output
 
-def checkConstraint(face, multi_faces_flag):
+
+def checkConstraint(bboxes, face):
     """
     Returns: error, errorMsg
     """
@@ -94,9 +95,10 @@ def checkConstraint(face, multi_faces_flag):
     if face is None:
         return True, 'There are no face in image'
     # warning if >1 face
-    if multi_faces_flag:
+    if len(bboxes) > 1:
         return True, 'There are more than 1 face'
     return False, ''
+
 
 def userRequired(f):
     @wraps(f)
@@ -147,22 +149,27 @@ def adminRequired(f):
 @adminRequired
 def createUser(currentUser):
     if request.method == 'POST':
-        data = request.form
-        hashedPassword = generate_password_hash(data.get('password'),
+        data = request.json['data']
+        users = User.query
+        for user in users:
+            if user.username == data["username"]:
+                return jsonify({'status': False, 'message': 'Username already exists', 'data': []})
+            if user.email == data["email"]:
+                return jsonify({'status': False, 'message': 'Email already exists', 'data': []})
+        hashedPassword = generate_password_hash(data['password'],
                                                 method='sha256')
-        newUser = User(username=data.get('username'),
-                       email=data.get('email'),
+        newUser = User(username=data['username'],
+                       email=data['email'],
                        password=hashedPassword,
                        isAdmin=False)
         db.session.add(newUser)
         db.session.commit()
-        return jsonify({'status': True, 'message': '', 'data': []})
+        return jsonify({'status': True, 'message': 'User added successfully', 'data': []})
 
 
 @app.route('/api/v1/addFaceUser', methods=['POST'])
 @adminRequired
 def addFaceUser(currentUser):
-
     if request.method == 'POST':
         userId = request.json['data']['userId']
         user = User.query.filter_by(id=userId).first()
@@ -174,10 +181,13 @@ def addFaceUser(currentUser):
             })
         data = request.json['data']['base64']
         img = readb64(data)
-        bbox, face, multi_faces_flag = detector.align(img)
-        error, errorMsg = checkConstraint(face, multi_faces_flag)
+        bboxes, face = detector.align(img)
+        if bboxes is None:
+            return jsonify({'status': False, 'message': 'There are no face', 'data': {}})
+
+        error, errorMsg = checkConstraint(bboxes, face)
         if error:
-            return jsonify({'status': False, 'message': errorMsg, 'data': []})
+            return jsonify({'status': False, 'message': errorMsg, 'data': {'bboxes': bboxes.tolist()}})
         img = np.array(face)[..., ::-1]
         nameFolder = user.username
         if user.pathToEmbedding:
@@ -199,7 +209,7 @@ def addFaceUser(currentUser):
         return jsonify({
             'status': True,
             'message': 'Add face for user successfully',
-            'data': []
+            'data': {'bbox': bboxes[0].tolist()}
         })
 
 
@@ -248,11 +258,7 @@ def login():
         username = request.json['data']['username']
         password = request.json['data']['password']
     except Exception as e:
-        return jsonify({
-            'status': False,
-            'message': repr(e),
-            'data': {}
-        })
+        return jsonify({'status': False, 'message': repr(e), 'data': {}})
     if not username or not password:
         return jsonify({
             'status': False,
@@ -290,18 +296,32 @@ def login():
         'data': {}
     })
 
+
 @app.route('/api/v1/checkFace', methods=['POST'])
 # @userRequired
 def checkFace():
+    def isCheckout(timeNow):
+        """
+        Return user record if checkin else None
+        """
+        dateNow = timeNow.date()
+        userRecords = CheckHistory.query.filter_by(userId=index)
+        for record in userRecords:
+            if record.checkinTime.date() == dateNow:
+                return record
+        return None
+
     if request.method == 'POST':
         start = time.time()
         identifier = Identifier(loadAllUserWithPath())
         data = request.json['data']['base64']
         img = readb64(data)
-        bbox, face, multi_faces_flag = detector.align(img)
-        error, errorMsg = checkConstraint(face, multi_faces_flag)
+        bboxes, face = detector.align(img)
+        if bboxes is None:
+            return jsonify({'status': False, 'message': 'There are no face', 'data': {}})
+        error, errorMsg = checkConstraint(bboxes, face)
         if error:
-            return jsonify({'status': False, 'message': errorMsg, 'data': []})
+            return jsonify({'status': False, 'message': errorMsg, 'data': {'bboxes': bboxes.tolist()}})
         rgb = np.array(face)[..., ::-1]
         # filestr = request.files['face'].read()
         # npimg = np.fromstring(filestr, np.uint8)
@@ -315,13 +335,12 @@ def checkFace():
                 'message': 'Cannot recognize user\'s face',
                 'data': []
             })
-        check = CheckHistory.query.filter_by(userId=index,
-                                             checkoutTime=None).first()
         timeNow = datetime.datetime.now()
+        check = isCheckout(timeNow)
         if check:
             check.checkoutTime = timeNow
             db.session.commit()
-            print(time.time() - start)
+            # print(time.time() - start)
             return jsonify({
                 'status': True,
                 'message': '',
@@ -329,14 +348,15 @@ def checkFace():
                     'onTime': checkoutOnTime(timeNow),
                     'checkoutTime': timeNow,
                     'index': index,
-                    'username': check.user.username
+                    'username': check.user.username,
+                    'bbox': bboxes[0].tolist()
                 }
             })
         else:
             check = CheckHistory(userId=index, checkinTime=timeNow)
             db.session.add(check)
             db.session.commit()
-            print(time.time() - start)
+            # print(time.time() - start)
             return jsonify({
                 'status': True,
                 'message': '',
@@ -344,7 +364,8 @@ def checkFace():
                     'onTime': checkinOnTime(timeNow),
                     'checkinTime': timeNow,
                     'index': index,
-                    'username': check.user.username
+                    'username': check.user.username,
+                    'bbox': bboxes[0].tolist()
                 }
             })
 
