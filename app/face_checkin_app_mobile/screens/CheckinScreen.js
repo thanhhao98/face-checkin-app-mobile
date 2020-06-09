@@ -36,7 +36,6 @@ export default class CheckinScreen extends React.Component {
             buttonNegative: 'Cancel',
           }}
           onGoogleVisionBarcodesDetected={({ barcodes }) => {
-            console.log(barcodes);
           }}
         />
         
@@ -72,9 +71,7 @@ export default class CheckinScreen extends React.Component {
       const options = { quality: 0.5, base64: true};
       const data = await this.camera.takePictureAsync(options);
       this.setState({image:data.uri})
-      // console.log(data);
-      //api post image -> backend
-      fetch("http://192.168.0.20:5000/testRecive",{
+      fetch("http://192.168.20.111:5000/testRecive",{
         method:"POST",
         headers: {
          'Content-Type': 'application/json'
