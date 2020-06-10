@@ -83,6 +83,8 @@ target 'face_checkin_app_mobile' do
 
   pod 'react-native-camera-kit', :path => '../node_modules/react-native-camera-kit'
 
+  pod 'react-native-image-picker', :path => '../node_modules/react-native-image-picker'
+
   target 'face_checkin_app_mobileTests' do
     inherit! :complete
     # Pods for testing
