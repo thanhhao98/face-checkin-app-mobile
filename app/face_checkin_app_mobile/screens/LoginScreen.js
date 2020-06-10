@@ -21,7 +21,7 @@ class LoginScreen extends React.Component {
                 password: this.state.password
             }
             let post = { data }
-            let res = await fetch('http://192.168.20.111:5000/api/v1/login', {
+            let res = await fetch('http://192.168.0.53:5000/api/v1/login', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
