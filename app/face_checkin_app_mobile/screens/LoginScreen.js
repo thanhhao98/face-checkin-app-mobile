@@ -9,7 +9,7 @@ class LoginScreen extends React.Component {
         this.state = {
             username: '',
             password: '',
-            checkLogin: 0
+            checkLogin: false,
         }
     }
     sendData = async (props) => {
@@ -30,7 +30,9 @@ class LoginScreen extends React.Component {
             let response = await res.json();
 
             if (!response.status) {
-                return;
+                this.setState({
+                    checkLogin: true
+                })
             }
             else {
                 let isAdmin = response.data.isAdmin;
@@ -57,6 +59,7 @@ class LoginScreen extends React.Component {
     onChangeText = (e) => {
         console.error(e)
     }
+
     render() {
         return (
             <View style={styles.container}>
@@ -76,8 +79,9 @@ class LoginScreen extends React.Component {
                                 "black"
                             }
                             value={this.state.username}
-                            onChangeText={(text) => this.setState({ username: text })}
+                            onChangeText={(text) => this.setState({ username: text,  checkLogin: false })}
                         />
+                        {this.state.checkLogin ? <Text style={{color:'#FF7F50',paddingLeft:3,fontStyle: 'italic'}}>wrong username or password</Text> : null}
                     </View>
                     <View style={styles.textInputContainer}>
                         <Text style={{ paddingLeft: 3, color: 'red' }}>Password</Text>
@@ -90,10 +94,11 @@ class LoginScreen extends React.Component {
                                     "black"
                                 }
                                 value={this.state.password}
-                                onChangeText={(text) => this.setState({ password: text })}
+                                onChangeText={(text) => this.setState({ password: text, checkLogin: false })}
                             >
                             </TextInput>
-                            {/* <Icon name='eye'></Icon> */}
+                            {this.state.checkLogin ? <Text style={{color:'#FF7F50',paddingLeft:3,fontStyle: 'italic'}}>wrong username or password</Text> : null}
+                            
                         </View>
                     </View>
                     <Button style={styles.buttonSignIn} onPress={this.sendData} >Sign In</Button>
