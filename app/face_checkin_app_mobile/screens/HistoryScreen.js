@@ -75,9 +75,6 @@ export default class HistoryScreen extends React.Component {
                     },
                 }}
                 onDateChange={date => {
-                    console.log(date,'aaaaaaaaaaaaaaaaa');
-                    //post api backend -> data 
-                    // setState data
                     this.setState({ date: date });
                 }}
             />
