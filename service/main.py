@@ -300,7 +300,7 @@ def login():
 @app.route('/api/v1/checkFace', methods=['POST'])
 # @userRequired
 def checkFace():
-    def isCheckout(timeNow):
+    def isCheckout(index, timeNow):
         """
         Return user record if checkin else None
         """
@@ -336,7 +336,7 @@ def checkFace():
                 'data': []
             })
         timeNow = datetime.datetime.now()
-        check = isCheckout(timeNow)
+        check = isCheckout(index, timeNow)
         if check:
             check.checkoutTime = timeNow
             db.session.commit()
