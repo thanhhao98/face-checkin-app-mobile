@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text , FlatList} from 'react-native';
+import { StyleSheet, View, Text , FlatList, AsyncStorage} from 'react-native';
 import { Title, Button } from 'react-native-paper';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import DatePicker from 'react-native-datepicker';
@@ -15,26 +15,23 @@ export default class HistoryScreen extends React.Component {
 
         this.state = {
             date: '15-05-2018',
-            data: [
-                // {checkin: '27-3-2020 08:31', checkout: '27-3-2020 08:31'},
-                {date: '27-3-2020 08:31', status: 'check-in'},
-                {date: '27-3-2020 17:31', status: 'check-out'},
-                {date: '28-3-2020 08:30', status: 'check-in'},
-                {date: '28-3-2020 17:32', status: 'check-out'},
-                {date: '29-3-2020 08:28', status: 'check-in'},
-                {date: '29-3-2020 17:35', status: 'check-out'},
-                {date: '30-3-2020 08:35', status: 'check-in'},
-                {date: '30-3-2020 17:32', status: 'check-out'},
-                {date: '27-3-2020 08:31', status: 'check-in'},
-                {date: '27-3-2020 17:31', status: 'check-out'},
-                {date: '28-3-2020 08:30', status: 'check-in'},
-                {date: '28-3-2020 17:32', status: 'check-out'},
-                {date: '29-3-2020 08:28', status: 'check-in'},
-                {date: '29-3-2020 17:35', status: 'check-out'},
-                {date: '30-3-2020 08:35', status: 'check-in'},
-                {date: '30-3-2020 17:32', status: 'check-out'}
-            ]
+            data: []
         }
+    }
+    async componentDidMount(){
+        let token = await AsyncStorage.getItem('token') || false;
+        let res = await fetch("http://192.168.0.20:5000/api/v1/getCheckHistory", {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'x-access-token': token,
+        }});
+        let response = await res.json()
+        this.setState({
+            data:response.data
+        })
+        
     }
 
     render() {
@@ -90,8 +87,8 @@ export default class HistoryScreen extends React.Component {
                                                      borderBottomWidth:2,
                                                    }}    
                                         >
-                                            <Text style={styles.item}>{item.date}</Text>
-                                            <Text style={styles.item}>{item.status}</Text>
+                                            <Text style={styles.item}>{item.checkin.time}</Text>
+                                            <Text style={styles.item}>{item.checkout.time}</Text>
                                         </View>}
             />
         </View>
