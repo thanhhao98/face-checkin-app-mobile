@@ -1,8 +1,7 @@
 import React from 'react';
-import { StyleSheet, View, Text , FlatList, Dimensions} from 'react-native';
+import { StyleSheet, View, Text , FlatList, Dimensions, AsyncStorage} from 'react-native';
 import DatePicker from 'react-native-datepicker';
 import { Button } from 'react-native-paper';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 
 var devicewidth = Dimensions.get('window').width;
 
@@ -105,8 +104,25 @@ export default class HistoryScreen extends React.Component {
 
         this.state = {
             date: '',
-            data: time_data
+            alldata:[],
+            data: [],
         }
+    }
+    async componentDidMount(){
+        let token = await AsyncStorage.getItem('token') || false;
+        let res = await fetch("https://cca354e1fd3d.ngrok.io/api/v1/getCheckHistory", {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'x-access-token': token,
+        }});
+        let response = await res.json();
+        this.setState({
+            alldata: response.data,
+            data: response.data,
+        })
+        
     }
 
     render() {

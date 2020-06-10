@@ -92,7 +92,7 @@ export default class CheckinScreen extends React.Component {
 			while(true){
 				const options = { quality: 0.5, base64: true};
 				const data = await this.camera.takePictureAsync(options);
-				let res = await fetch("http://192.168.0.53:5000/api/v1/checkFace", {
+				let res = await fetch("https://cca354e1fd3d.ngrok.io/api/v1/checkFace", {
 				method: 'POST',
 				headers: {
 					'Accept': 'application/json',

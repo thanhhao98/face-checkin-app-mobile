@@ -1,15 +1,16 @@
 import React from 'react';
-import { StyleSheet, View, Text, TextInput, StatusBar, AsyncStorage } from 'react-native';
+import { StyleSheet, View, Text, TextInput, StatusBar, AsyncStorage,  } from 'react-native';
 import { Title, Button } from 'react-native-paper';
+// import ImagePicker from 'react-native-image-picker';
 
-
-class LoginScreen extends React.Component {
+class AddUserScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             username: '',
             password: '',
-            checkLogin: false,
+            email: '',
+            photo: null,
         }
     }
     sendData = async (props) => {
@@ -49,7 +50,8 @@ class LoginScreen extends React.Component {
 
             this.setState({
                 username: '',
-                password: ''
+                password: '',
+                email: '',
             })
             // AsyncStorage.setItem('aaaaa','asdfasdfg7h9832j0p')
         } catch (e) {
@@ -60,20 +62,51 @@ class LoginScreen extends React.Component {
         console.error(e)
     }
 
+    chooseFile = () => {
+        // var options = {
+        //   title: 'Select Image',
+        //   customButtons: [
+        //     { name: 'customOptionKey', title: 'Choose Photo from Custom Option' },
+        //   ],
+        //   storageOptions: {
+        //     skipBackup: true,
+        //     path: 'images',
+        //   },
+        // };
+        // ImagePicker.showImagePicker(options, response => {
+        //   console.log('Response = ', response);
+    
+        //   if (response.didCancel) {
+        //     console.log('User cancelled image picker');
+        //   } else if (response.error) {
+        //     console.log('ImagePicker Error: ', response.error);
+        //   } else if (response.customButton) {
+        //     console.log('User tapped custom button: ', response.customButton);
+        //     alert(response.customButton);
+        //   } else {
+        //     let source = response;
+        //     // You can also display the image using data:
+        //     // let source = { uri: 'data:image/jpeg;base64,' + response.data };
+        //     this.setState({
+        //       filePath: source,
+        //     });
+        //   }
+        // });
+      };
     render() {
+        const { photo } = this.state
         return (
             <View style={styles.container}>
 
                 <StatusBar barStyle="dark-content" hidden={false} backgroundColor="#0a4ff0" translucent={true} />
                 <View style={styles.down}>
-                    <Title style={{ color: 'blue' }} >Login to your account</Title>
+                    
                     {/* <Paragraph> Hi there! Nice to see you again.</Paragraph> */}
                     <View style={styles.textInputContainer}>
-                        <Text style={{ paddingLeft: 3, color: 'red' }}>Email</Text>
+                        <Text style={{ paddingLeft: 3, color: 'red' }}>username</Text>
                         <TextInput
                             style={styles.textInput}
                             placeholder='Enter your email'
-                            textContentType='emailAddress'
                             keyboardType='email-address'
                             underlineColorAndroid={
                                 "black"
@@ -89,7 +122,7 @@ class LoginScreen extends React.Component {
                             <TextInput
                                 style={styles.textInput}
                                 placeholder='Enter your password'
-                                secureTextEntry={true}
+                                secureTextEntry={this.state.secureTextEntry}
                                 underlineColorAndroid={
                                     "black"
                                 }
@@ -100,6 +133,40 @@ class LoginScreen extends React.Component {
                             {this.state.checkLogin ? <Text style={{color:'#FF7F50',paddingLeft:3,fontStyle: 'italic'}}>wrong username or password</Text> : null}
                             
                         </View>
+                    </View>
+                    <View style={styles.textInputContainer}>
+                        <Text style={{ paddingLeft: 3, color: 'red' }}>Email</Text>
+                        <TextInput
+                            style={styles.textInput}
+                            placeholder='Enter your email'
+                            textContentType='emailAddress'
+                            keyboardType='email-address'
+                            underlineColorAndroid={
+                                "black"
+                            }
+                            value={this.state.email}
+                            onChangeText={(text) => this.setState({ username: text,  checkLogin: false })}
+                        />
+                        {this.state.checkLogin ? <Text style={{color:'#FF7F50',paddingLeft:3,fontStyle: 'italic'}}>wrong username or password</Text> : null}
+                    </View>
+                    <View style={styles.container}>
+                        {/*<Image 
+                        source={{ uri: this.state.filePath.path}} 
+                        style={{width: 100, height: 100}} />*/}
+                        <Image
+                            source={{
+                            uri: 'data:image/jpeg;base64,' + this.state.filePath.data,
+                            }}
+                            style={{ width: 100, height: 100 }}
+                        />
+                        <Image
+                            source={{ uri: this.state.filePath.uri }}
+                            style={{ width: 250, height: 250 }}
+                        />
+                        <Text style={{ alignItems: 'center' }}>
+                            {this.state.filePath.uri}
+                        </Text>
+                        <Button title="Choose File" onPress={this.chooseFile.bind(this)} />
                     </View>
                     <Button style={styles.buttonSignIn} onPress={this.sendData} >Sign In</Button>
                 </View>
@@ -155,4 +222,4 @@ const styles = StyleSheet.create({
         height: 45,
     }
 })
-export default LoginScreen;
+export default AddUserScreen;

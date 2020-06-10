@@ -9,10 +9,9 @@ import { DrawerContent } from './screens/DrawerContent';
 import LoginScreen from './screens/LoginScreen';
 import CheckinScreen from './screens/CheckinScreen';
 import HistoryScreen from './screens/HistoryScreen';
-import ManageUser from './screens/ManageUser';
-// import { Icon } from 'react-native-paper/lib/typescript/src/components/Avatar/Avatar';
+import ManageUserScreen from './screens/ManageUserScreen';
+import AddUserScreen from './screens/AddUserScreen';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { IconButton } from 'react-native-paper';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -113,7 +112,7 @@ const ManageUserStackScreen = ({ navigation }) => (
     }
   }}>
     <Stack.Screen 
-      name="ManageUser" component={ManageUser} 
+      name="ManageUser" component={ManageUserScreen} 
       options={{
         title:'Manage User',
         headerLeft: () => (
@@ -122,6 +121,43 @@ const ManageUserStackScreen = ({ navigation }) => (
             size={28} 
             backgroundColor="#4179f7" 
             onPress={()=>navigation.openDrawer()}>
+          </Icon.Button>
+        ),
+        headerRight:() => (
+          <Icon.Button
+            name="ios-add"
+            size={28} 
+            backgroundColor="#4179f7" 
+            onPress={()=>navigation.navigate('AddUser')}>
+
+          </Icon.Button>
+        )
+      }}
+    />
+  </Stack.Navigator>
+);
+
+const HistoryStackScreenTest = ({ navigation }) => (
+  <Stack.Navigator screenOptions={{
+    headerStyle: {
+      backgroundColor:"#4179f7",
+    },
+    headerTintColor: "white",
+    headerTitleStyle: {
+      fontWeight: "bold",
+      
+    }
+  }}>
+    <Stack.Screen 
+      name="AddUser" component={AddUserScreen} 
+      options={{
+        title:'Add New User',
+        headerLeft: () => (
+          <Icon.Button 
+            name="ios-arrow-round-back" 
+            size={28} 
+            backgroundColor="#4179f7" 
+            onPress={()=>navigation.goBack()}>
           </Icon.Button>
         )
       }}
@@ -146,6 +182,7 @@ class App extends React.Component {
         <Drawer.Screen name="Checkin" component={CheckinStackScreen} />
         <Drawer.Screen name="History" component={HistoryStackScreen} />
         <Drawer.Screen name="ManageUser" component={ManageUserStackScreen}/>
+        <Drawer.Screen name="AddUser" component={HistoryStackScreenTest} />
 
       </Drawer.Navigator>
     </NavigationContainer>
