@@ -1,8 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Text, TextInput, StatusBar, AsyncStorage } from 'react-native';
-import { Title, Paragraph, Button } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome';
-// import { Icon } from 'react-native-paper/lib/typescript/src/components/Avatar/Avatar';
+import { Title, Button } from 'react-native-paper';
 
 
 class LoginScreen extends React.Component {
@@ -21,7 +19,7 @@ class LoginScreen extends React.Component {
                 password: this.state.password
             }
             let post = { data }
-            let res = await fetch('http://192.168.20.111:5000/api/v1/login', {
+            let res = await fetch('http://192.168.0.20:5000/api/v1/login', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -41,7 +39,7 @@ class LoginScreen extends React.Component {
                     await AsyncStorage.setItem('isAdmin', isAdmin.toString());
                     await AsyncStorage.setItem('isLogin', 'true');
                     await AsyncStorage.setItem('token', token.toString())
-                    this.props.navigation.navigate('ManageUser')
+                    this.props.navigation.navigate('History')
                 } catch (error) {
                     console.error(error.message)
                 }
@@ -65,7 +63,7 @@ class LoginScreen extends React.Component {
 
                 <StatusBar barStyle="dark-content" hidden={false} backgroundColor="#0a4ff0" translucent={true} />
                 <View style={styles.down}>
-                    <Title style={{ color: 'blue', size: 25 }} >Login to your account</Title>
+                    <Title style={{ color: 'blue' }} >Login to your account</Title>
                     {/* <Paragraph> Hi there! Nice to see you again.</Paragraph> */}
                     <View style={styles.textInputContainer}>
                         <Text style={{ paddingLeft: 3, color: 'red' }}>Email</Text>
@@ -75,7 +73,7 @@ class LoginScreen extends React.Component {
                             textContentType='emailAddress'
                             keyboardType='email-address'
                             underlineColorAndroid={
-                                "428AF8"
+                                "black"
                             }
                             value={this.state.username}
                             onChangeText={(text) => this.setState({ username: text })}
@@ -89,7 +87,7 @@ class LoginScreen extends React.Component {
                                 placeholder='Enter your password'
                                 secureTextEntry={true}
                                 underlineColorAndroid={
-                                    "428AF8"
+                                    "black"
                                 }
                                 value={this.state.password}
                                 onChangeText={(text) => this.setState({ password: text })}
