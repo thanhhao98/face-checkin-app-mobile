@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Text, TextInput, StatusBar, AsyncStorage } from 'react-native';
 import { Title, Button } from 'react-native-paper';
-
+import Header from '../components/header'
 
 class LoginScreen extends React.Component {
     constructor(props) {
@@ -19,7 +19,7 @@ class LoginScreen extends React.Component {
                 password: this.state.password
             }
             let post = { data }
-            let res = await fetch('https://cca354e1fd3d.ngrok.io/api/v1/login', {
+            let res = await fetch('http://192.168.2.18:5000/api/v1/login', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -41,7 +41,17 @@ class LoginScreen extends React.Component {
                     await AsyncStorage.setItem('isAdmin', isAdmin.toString());
                     await AsyncStorage.setItem('isLogin', 'true');
                     await AsyncStorage.setItem('token', token.toString())
-                    this.props.navigation.navigate('History')
+
+                    //get data for manage history screen
+                    let res = await fetch("http://192.168.2.18:5000/api/v1/getCheckHistory", {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'x-access-token': token,
+                    }});
+                    let response = await res.json();
+                    this.props.navigation.navigate('History',{data:response})
                 } catch (error) {
                     console.error(error.message)
                 }
@@ -63,10 +73,9 @@ class LoginScreen extends React.Component {
     render() {
         return (
             <View style={styles.container}>
-
                 <StatusBar barStyle="dark-content" hidden={false} backgroundColor="#0a4ff0" translucent={true} />
+                <Header title="Login" navigation={this.props.navigation}/>
                 <View style={styles.down}>
-                    <Title style={{ color: 'blue' }} >Login to your account</Title>
                     {/* <Paragraph> Hi there! Nice to see you again.</Paragraph> */}
                     <View style={styles.textInputContainer}>
                         <Text style={{ paddingLeft: 3, color: 'red' }}>Email</Text>
@@ -102,6 +111,7 @@ class LoginScreen extends React.Component {
                         </View>
                     </View>
                     <Button style={styles.buttonSignIn} onPress={this.sendData} >Sign In</Button>
+
                 </View>
             </View>
         );
@@ -125,7 +135,8 @@ const styles = StyleSheet.create({
         flex: 7,
         flexDirection: 'column',
         justifyContent: 'flex-start',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginTop: "32%"
     },
     title: {
         color: 'white',
