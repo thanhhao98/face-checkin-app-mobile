@@ -1,49 +1,60 @@
 import React from 'react';
 import { StyleSheet, View, Text, TextInput, StatusBar, FlatList}  from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import Header from '../components/header'
 
 export default class ManageUserScreen extends React.Component {
     constructor () {
         super();
 
         this.state = {
-            date: '15-05-2018',
+            date: '',
             data: [
                 {
-                    username:'haomai',
+                    username:'thuan',
                     userId: '10'
                 },
                 {
                     username:'ronaldo',
                     userId:'2'
+                },
+                {
+                    username:'benzema',
+                    userId: '3'
+                },
+                {
+                    username:'bruyne',
+                    userId:'7'
                 }
             ],
             modalVisible: false,
         }
+        
     }
-    getHistoryUser(){
-        console.log('gethistory')
 
-    }
-    // async componentDidMount(){
+    // async componentDidUpdate(prevProps){
+
     //     let token = await AsyncStorage.getItem('token') || false;
-    //     let res = await fetch("http://192.168.0.20:5000/api/v1/getCheckHistory", {
-    //     method: 'GET',
-    //     headers: {
-    //         'Accept': 'application/json',
-    //         'Content-Type': 'application/json',
-    //         'x-access-token': token,
-    //     }});
-    //     let response = await res.json()
+    //     let res = await fetch('http://192.168.2.18:5000/api/v1/getAllCheckHistory', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Accept': 'application/json',
+    //             'Content-Type': 'application/json',
+    //             'x-access-token': token,
+    //         },
+    //     });
+    //     let response = await res.json();
     //     this.setState({
     //         data:response.data
     //     })
-        
+
     // }
+
     render() {
         return (
-            <View>
+            <View style={styles.container}>
                 <StatusBar barStyle = "dark-content" hidden = {false} backgroundColor = "#0a4ff0" translucent = {true}/>
+                <Header title="Manage User" navigation={this.props.navigation} isStatus={true}/>
                 <FlatList
                 style={styles.list}
                 const data = {this.state.data}
@@ -57,7 +68,7 @@ export default class ManageUserScreen extends React.Component {
                     borderBottomColor: '#ddd',
                     borderBottomWidth:2,
                     }}
-                    onPress={()=>this.getHistoryUser()}
+                    onPress={()=>this.props.navigation.navigate('HistoryUser',{data:item.userId})}
                 >
                 
                 <Text style={styles.item}>{item.username}</Text>
@@ -75,10 +86,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         alignItems: 'center',
-    },
-    statusbar: {
-        backgroundColor: '#FFCE00',
-        height: 20
     },
     headerContainer :{
         backgroundColor: "#ddd",
