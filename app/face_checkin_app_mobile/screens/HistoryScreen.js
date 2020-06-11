@@ -29,6 +29,16 @@ export default class HistoryScreen extends React.Component {
             data: [],
         }
     }
+    componentDidMount(){
+            const {data} =  this.props.route.params;
+            this.setState({
+                data: data.data,
+                alldata: data.data,
+            })
+
+            console.warn(data,'111111111111111111111111111111')
+    }
+    
     componentDidUpdate(prevProps){
         if(this.props.route.params !== prevProps.route.params) {
             const {data} =  this.props.route.params;
