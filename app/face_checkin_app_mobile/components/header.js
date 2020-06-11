@@ -4,15 +4,20 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { IconButton } from 'react-native-paper';
 const statusbarHeight = StatusBar.currentHeight;
 
-export default function Header ({navigation,title, isStatus}) {
+export default function Header ({navigation,title, isStatus, isBack}) {
     return (
             <View style={styles.header}>
-                <Icon.Button 
+                {isBack? <Icon.Button 
+                    name="ios-arrow-round-back" 
+                    size= {28}
+                    style={styles.icon}
+                    onPress={()=>navigation.goBack()}
+                /> : <Icon.Button 
                     name="ios-menu" 
                     size= {28}
                     style={styles.icon}
                     onPress={()=>navigation.openDrawer()}
-                />
+                />}
                 <Text style={styles.headerText}>{title}</Text>
                 {isStatus? <Icon.Button
                     name="ios-add"
@@ -47,7 +52,7 @@ const styles = StyleSheet.create({
     },
     icon2: {
         // position:'absolute',
-        // left:-20,
+        // marginLeft:20,
         backgroundColor: "#4197f7"
     }
 })
