@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import {RNCamera}  from 'react-native-camera';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {IconButton} from 'react-native-paper';
 import { ProgressBar} from 'react-native-paper';
+import Header from '../components/header';
 
 export default class CheckinScreen extends React.Component {
   constructor() {
@@ -22,7 +22,7 @@ export default class CheckinScreen extends React.Component {
 			username: '',
 			status: '',
 			progressBar: false,
-      image:'',
+      		image:'',
 			cameraOn: true,
     }
   }
@@ -30,6 +30,7 @@ export default class CheckinScreen extends React.Component {
     return (
 			<View style={styles.container}>
 				<StatusBar barStyle = "dark-content" hidden = {false} backgroundColor = "#0a4ff0" translucent = {true}/>
+				<Header title="Checkin" navigation={this.props.navigation}/>
 				{this.state.cameraOn ? (
 					<RNCamera
 					ref={ref => {
@@ -52,7 +53,7 @@ export default class CheckinScreen extends React.Component {
 						}}
 					/> 
 				)}
-				<View>
+				<View style={{marginTop:StatusBar.currentHeight}}>
 					<ProgressBar indeterminate={true} visible={this.state.progressBar}/>
 				</View>
 				<View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center'  }}>
@@ -92,7 +93,7 @@ export default class CheckinScreen extends React.Component {
 			while(true){
 				const options = { quality: 0.5, base64: true};
 				const data = await this.camera.takePictureAsync(options);
-				let res = await fetch("https://cca354e1fd3d.ngrok.io/api/v1/checkFace", {
+				let res = await fetch("http://192.168.2.18:5000/api/v1/checkFace", {
 				method: 'POST',
 				headers: {
 					'Accept': 'application/json',
@@ -143,14 +144,15 @@ const styles = StyleSheet.create({
 		flexDirection: 'column',
 		alignItems: 'center',
 		height: 400,
-		overflow: "hidden"
+		overflow: "hidden",
+		top: StatusBar.currentHeight
 	},
 	capture: {
 		flex: 0,
 		padding: 15,
 		paddingHorizontal: 20,
 		alignSelf: 'center',
-		margin: 20,
+		marginTop: 40,
 		width:80, 
 		height: 80, 
 		borderRadius:40, 
