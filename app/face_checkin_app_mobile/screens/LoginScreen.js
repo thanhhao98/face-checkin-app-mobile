@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, View, Text, TextInput, StatusBar, AsyncStorage } from 'react-native';
 import { Title, Button } from 'react-native-paper';
-import Header from '../components/header'
-
+import Header from '../components/header';
+import Loader from '../components/loader';
 class LoginScreen extends React.Component {
     constructor(props) {
         super(props);
@@ -10,6 +10,7 @@ class LoginScreen extends React.Component {
             username: '',
             password: '',
             checkLogin: false,
+            isLoading: true,
         }
     }
     sendData = async (props) => {
@@ -28,7 +29,9 @@ class LoginScreen extends React.Component {
                 body: JSON.stringify(post)
             });
             let response = await res.json();
-
+            this.setState({
+                isLoading: false
+            })
             if (!response.status) {
                 this.setState({
                     checkLogin: true
@@ -73,6 +76,8 @@ class LoginScreen extends React.Component {
     render() {
         return (
             <View style={styles.container}>
+             <Loader
+                    loading={this.state.isLoading} />
                 <StatusBar barStyle="dark-content" hidden={false} backgroundColor="#0a4ff0" translucent={true} />
                 <Header title="Login" navigation={this.props.navigation}/>
                 <View style={styles.down}>
