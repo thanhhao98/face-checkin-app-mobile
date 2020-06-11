@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, View, Text , FlatList, Dimensions, AsyncStorage} from 'react-native';
+import { StyleSheet, View, Text , FlatList, Dimensions, StatusBar} from 'react-native';
 import DatePicker from 'react-native-datepicker';
 import { Button } from 'react-native-paper';
+import Header from '../components/header' 
 
 var devicewidth = Dimensions.get('window').width;
 
@@ -16,172 +17,92 @@ function Item({ title, checkin, checkout }) {
       </View>
     );
   }
-const time_data = [
-    {
-        checkin: {
-            onTime: 'true',
-            time: "Thu, 11 Jun 2020 01:33:10 GMT"
-        },
-        checkout: {
-            onTime: 'false',
-            time: "Thu, 11 Jun 2020 09:33:10 GMT"
-        }
-    },
-    {
-        checkin: {
-            onTime: 'true',
-            time: "Wed, 10 Jun 2020 02:33:10 GMT"
-        },
-        checkout: {
-            onTime: 'false',
-            time: "Wed, 10 Jun 2020 10:33:10 GMT"
-        }
-    },
-    {
-        checkin: {
-            onTime: 'true',
-            time: "Wed, 10 Jun 2020 03:33:10 GMT"
-        },
-        checkout: {
-            onTime: 'false',
-            time: "Wed, 10 Jun 2020 11:33:10 GMT"
-        }
-    },
-    {
-        checkin: {
-            onTime: 'true',
-            time: "Wed, 10 Jun 2020 04:33:10 GMT"
-        },
-        checkout: {
-            onTime: 'false',
-            time: "Wed, 10 Jun 2020 12:33:10 GMT"
-        }
-    },
-    {
-        checkin: {
-            onTime: 'true',
-            time: "Wed, 10 Jun 2020 01:33:10 GMT"
-        },
-        checkout: {
-            onTime: 'false',
-            time: "Wed, 10 Jun 2020 09:33:10 GMT"
-        }
-    },
-    {
-        checkin: {
-            onTime: 'true',
-            time: "Wed, 10 Jun 2020 02:33:10 GMT"
-        },
-        checkout: {
-            onTime: 'false',
-            time: "Wed, 10 Jun 2020 10:33:10 GMT"
-        }
-    },
-    {
-        checkin: {
-            onTime: 'true',
-            time: "Wed, 10 Jun 2020 03:33:10 GMT"
-        },
-        checkout: {
-            onTime: 'false',
-            time: "Wed, 10 Jun 2020 11:33:10 GMT"
-        }
-    },
-    {
-        checkin: {
-            onTime: 'true',
-            time: "Wed, 10 Jun 2020 04:33:10 GMT"
-        },
-        checkout: {
-            onTime: 'false',
-            time: "Wed, 10 Jun 2020 12:33:10 GMT"
-        }
-    }
-]
-export default class HistoryScreen extends React.Component {
-    constructor () {
-        super();
 
+export default class HistoryScreen extends React.Component {
+    
+    constructor (props) {
+        super(props);
+        // console.log(props.navigation.getParam('respone'))
         this.state = {
             date: '',
             alldata:[],
             data: [],
         }
     }
-    async componentDidMount(){
-        let token = await AsyncStorage.getItem('token') || false;
-        let res = await fetch("https://cca354e1fd3d.ngrok.io/api/v1/getCheckHistory", {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'x-access-token': token,
-        }});
-        let response = await res.json();
-        this.setState({
-            alldata: response.data,
-            data: response.data,
-        })
-        
-    }
+    componentDidUpdate(prevProps){
+        if(this.props.route.params !== prevProps.route.params) {
+            const {data} =  this.props.route.params;
+            this.setState({
+                data: data.data,
+                alldata: data.data,
+            })
 
+            console.warn(data,'111111111111111111111111111111')
+        }
+    }
+    checkinLate(){
+        const data = this.state.alldata.filter(item=>{
+            return !item.checkin.onTime
+        })
+        this.setState({data})
+        console.log(data,'55555555555555555555555')
+    }
     render() {
         return (
             <View style={styles.container}>
-               
-            <DatePicker
-                style={styles.datepicker}
-                date={this.state.date} //initial date from state
-                mode="date" //The enum of date, datetime and time
-                placeholder="Search Date"
-                format="DD-MM-YYYY"
-                minDate="01-01-2016"
-                maxDate="01-01-2025"
-                confirmBtnText="Confirm"
-                cancelBtnText="Cancel"
-                customStyles={{
-                    dateIcon: {
-                        position: 'absolute',
-                        left: 0,
-                        top: 4,
-                        marginLeft: 0,
-                    },
-                    dateInput: {
-                        marginLeft: 40,
-                        borderRadius:10,
-                        borderWidth:2,
-                        height: 45,
-                        fontSize: 20
-                    },
-                }}
-                onDateChange={date => {
-                    const day = date.toString().substring(0,2); 
-                    const month = date.toString().substring(3,5);
-                    const year = date.toString().substring(6,10);
-                    const formatDay =  new Date (year, month, day);
-                    // const SearchDay = formatDay.substring(0,16);
-                    console.log(formatDay+ "aaaaaaaaaaaaaaaaaa")
-                    const new_data = this.state.data.filter(item => item.checkin.time.includes("Thu, 11 Jun"))
-                    console.log(new_data, "bbbbbbbbbbbbbbbbbbbbbbbbbbb")
-                    this.setState({ date: date, data:new_data });
-                }}
-            />
-            <View style={{ flexDirection:"row" }}>
-                <Button onPress={()=>this.setState({data:time_data})}> Show All</Button>
-                <Button>Checkin Late</Button>
+                <StatusBar barStyle="dark-content" hidden={false} backgroundColor="#0a4ff0" translucent={true} />
+                <Header title="Manage History" navigation={this.props.navigation} />
+                <DatePicker
+                    style={styles.datepicker}
+                    date={this.state.date} //initial date from state
+                    mode="date" //The enum of date, datetime and time
+                    placeholder="Search Date"
+                    format="DD-MM-YYYY"
+                    minDate="01-01-2016"
+                    maxDate="01-01-2025"
+                    confirmBtnText="Confirm"
+                    cancelBtnText="Cancel"
+                    customStyles={{
+                        dateIcon: {
+                            position: 'absolute',
+                            left: 0,
+                            top: 4,
+                            marginLeft: 0,
+                        },
+                        dateInput: {
+                            marginLeft: 40,
+                            borderRadius:10,
+                            borderWidth:2,
+                            height: 45,
+                            fontSize: 20
+                        },
+                    }}
+                    onDateChange={date => {
+                        const day = date.toString().substring(0,2); 
+                        const month = date.toString().substring(3,5);
+                        const year = date.toString().substring(6,10);
+                        const formatDay =  new Date (year+'-'+month+'-'+day);
+                        const SearchDay = formatDay.toString().substring(0,16);
+                        const new_data = this.state.alldata.filter(item => item.checkin.time.includes(SearchDay))
+                        this.setState({ date: date, data:new_data });
+                    }}
+                />
+                <View style={{ flexDirection:"row" }}>
+                    <Button onPress={()=>this.setState({data:this.state.alldata})}> Show All</Button>
+                    <Button onPress={()=>{this.checkinLate()}}>Checkin Late</Button>
+                </View>
+                <FlatList
+                    style={styles.flatlist}
+                    const data = {this.state.data}
+                    renderItem={({item}) => 
+                    <Item 
+                        title={item.checkin.time.substring(0,16)} 
+                        checkin={item.checkin.time.substring(17,25)} 
+                        checkout={item.checkout.time.substring(17,25)}
+                    />}
+                    keyExtractor={(item, index) => index.toString()} 
+                />
             </View>
-            <FlatList
-                style={styles.flatlist}
-                const data = {this.state.data}
-                renderItem={({item}) => 
-                <Item 
-                    title={item.checkin.time.substring(0,16)} 
-                    checkin={item.checkin.time.substring(17,25)} 
-                    checkout={item.checkout.time.substring(17,25)}
-                />}
-                keyExtractor={(item, index) => index.toString()} 
-            />
-        </View>
         )
     }
 }
@@ -193,7 +114,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     datepicker: {
-        marginTop: 25,
+        marginTop: '12%',
         width: devicewidth*0.8,
     },  
     flatlist: {
