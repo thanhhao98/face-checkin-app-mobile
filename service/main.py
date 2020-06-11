@@ -433,7 +433,7 @@ def getHistoryOfAllUser(currentUser):
         if check.checkoutTime:
             checkoutRecord = {
                 'onTime': checkoutOnTime(check.checkoutTime),
-                'time': converDatetime(heck.checkoutTime)
+                'time': converDatetime(check.checkoutTime)
             }
         else:
             checkoutRecord = None
@@ -442,7 +442,7 @@ def getHistoryOfAllUser(currentUser):
             'username': check.user.username,
             'checkin': {
                 'onTime': checkinOnTime(check.checkinTime),
-                'time': converDatetime(heck.checkinTime)
+                'time': converDatetime(check.checkinTime)
             },
             'checkout': checkoutRecord
         }
