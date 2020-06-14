@@ -465,7 +465,11 @@ def getHistoryUserWithId(currentUser, userId):
             'data': []
         })
     checks = CheckHistory.query.filter_by(user=user).all()
-    data = []
+    data = {
+        'userId': user.id,
+        'username': user.username,
+        'data': []
+    }
     for check in checks:
         if check.checkoutTime:
             checkoutRecord = {
@@ -475,15 +479,13 @@ def getHistoryUserWithId(currentUser, userId):
         else:
             checkoutRecord = None
         record = {
-            'userId': check.user.id,
-            'username': check.user.username,
             'checkin': {
                 'onTime': checkinOnTime(check.checkinTime),
                 'time': check.checkinTime
             },
             'checkout': checkoutRecord
         }
-        data.append(record)
+        data['data'].append(record)
     return jsonify({'status': True, 'message': '', 'data': data})
 
 
