@@ -84,15 +84,23 @@ export default class CheckinScreen extends React.Component {
 		);
   }
   takePicture = async () => {
-
-	  console.log(SERVER_IP+'api/vi/checkFace')
+		if (this.state.progressBar){
+				this.setState({
+					username: '',
+					status: '',
+					progressBar: false,
+			})
+			return
+		}
 		if (this.camera) {
-			this.setState({
+			await this.setState({
 				username: '',
 				status: 'Checking',
 				progressBar: true,
-			})
-			while(true){
+			})	
+			console.log(this.state.progressBar)
+			while(this.state.progressBar){
+				console.log('checkin')
 				const options = { quality: 0.5, base64: true};
 				const data = await this.camera.takePictureAsync(options);
 				let res = await fetch(SERVER_IP+'api/v1/checkFace', {
@@ -107,24 +115,27 @@ export default class CheckinScreen extends React.Component {
 				})
 				let response = await res.json()
 				if (response['status']){
-					this.setState({
-						username: response['data']['username'],
-						status: '',
-						progressBar: false,
-						cameraOn: false,
-						image: data.uri,
-					})
+					if(this.state.progressBar){
+						this.setState({
+							username: response['data']['username'],
+							status: '',
+							progressBar: false,
+							cameraOn: false,
+							image: data.uri,
+						})
+					}
 					break
 				}
 				else{
-					this.setState({
-						username: '',
-						status: response['message']
-					})
+					if(this.state.progressBar){
+						this.setState({
+							username: '',
+							status: response['message']
+						})
+					}
 				}
 			}
 		} else {
-			console.log('setcamera')
 			this.setState({
 				username: '',
 				status: '',
