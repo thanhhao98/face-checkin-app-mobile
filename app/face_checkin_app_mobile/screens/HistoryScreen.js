@@ -8,13 +8,13 @@ import {SERVER_IP} from '../Config'
 
 var devicewidth = Dimensions.get('window').width;
 
-function Item({ title, checkin, checkout }) {
+function Item({ title, checkin, checkout, checkinOntime, checkoutOntime}) {
     return (
       <View style={styles.item}>
         <Text style={styles.title}>{title}</Text>
         <View style={ {flexDirection:'row', justifyContent: "space-between"} }>
-            <Text style={styles.checkin}>Checkin: {checkin}</Text>
-            <Text style={styles.checkout}>Checkout: {checkout}</Text>
+            <Text style={[styles.checkin, checkinOntime? styles.ontime: styles.late]}>Checkin: {checkin}</Text>
+            <Text style={[styles.checkout, checkoutOntime? styles.ontime: styles.late]}>Checkout: {checkout}</Text>
         </View>
       </View>
     );
@@ -49,7 +49,9 @@ export default class HistoryScreen extends React.Component {
     componentDidUpdate(prevProps) {
         const {data} = this.props.route.params;
         if(this.props.route.params && this.props.route.params !== prevProps.route.params) {
-                    const {data} =  this.props.route.params;
+                    let {data} =  this.props.route.params;
+                    data = data.reverse()
+                    console.log(data)
                     this.setState({
                         data: data,
                         alldata: data,
@@ -116,6 +118,8 @@ export default class HistoryScreen extends React.Component {
                         title={item.checkin.time.substring(0,16)} 
                         checkin={item.checkin.time.substring(16,25)} 
                         checkout={item.checkout.time.substring(16,25)}
+                        checkinOntime={item.checkin.onTime}
+                        checkoutOntime={item.checkout.onTime}
                     />}
                     keyExtractor={(item, index) => index.toString()} 
                 />
@@ -129,6 +133,12 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#eee',
         alignItems: 'center',
+    },
+    ontime: {
+        color: 'black',
+    },
+    late: {
+        color: 'red',
     },
     datepicker: {
         marginTop: '12%',
