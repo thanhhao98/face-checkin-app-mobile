@@ -11,6 +11,7 @@ import {
   DrawerItem
 } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {SERVER_IP} from '../Config.js'
 
 
 export function DrawerContent(props) {
@@ -27,7 +28,7 @@ export function DrawerContent(props) {
         }
         else{
           let checkAdmin = await AsyncStorage.getItem('isAdmin') || false;
-        let checkLogin = await AsyncStorage.getItem('isLogin') || false;
+          let checkLogin = await AsyncStorage.getItem('isLogin') || false;
         if (checkAdmin === 'true') {
           setAdmin(true);
           setLogin(true)
@@ -47,7 +48,20 @@ export function DrawerContent(props) {
     }
   });
 
+  async function callApiHistory() {
+    let token = await AsyncStorage.getItem('token') || false;
+    let res = await fetch(SERVER_IP+"api/v1/getCheckHistory", {
+      method: 'GET',
+      headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'x-access-token': token,
+      }});
+      let response = await res.json();
+      console.log('calll history')
 
+      const redirect = response.status? props.navigation.navigate('History', {data: response.data}) :  props.navigation.navigate('Login')
+  }
 
   if (!isLogin) {
     return (
@@ -137,7 +151,9 @@ export function DrawerContent(props) {
                     />
                   )}
                   label="History"
-                  onPress={() => { props.navigation.navigate('History') }}
+                  onPress={async() => {
+                    await callApiHistory();
+                    }}
                 />
                 <DrawerItem
                   icon={({ color, size }) => (

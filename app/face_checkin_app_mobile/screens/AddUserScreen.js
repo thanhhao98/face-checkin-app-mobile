@@ -23,8 +23,7 @@ class AddUserScreen extends React.Component {
                 password: this.state.password
             }
             let post = { data }
-		console.log(SERVER_IP+'api/v1/createUser')
-		let res = await fetch(SERVER_IP+'api/v1/createUser', {
+		    let res = await fetch(SERVER_IP+'api/v1/createUser', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -34,35 +33,24 @@ class AddUserScreen extends React.Component {
                 body: JSON.stringify(post)
             });
             let response = await res.json();
-
             if (!response.status) {
                 this.setState({
                     checkLogin: true
                 })
             }
-//             else {
-//                 let isAdmin = response.data.isAdmin;
-//                 let token = response.data.token;
-//                 try {
-//                     await AsyncStorage.setItem('isAdmin', isAdmin.toString());
-//                     await AsyncStorage.setItem('isLogin', 'true');
-//                     await AsyncStorage.setItem('token', token.toString())
-// 0
-//                     //get data for manage history screen
-//                     let res = await fetch("http://192.168.0.46:5000/api/v1/getCheckHistory", {
-//                     method: 'GET',
-//                     headers: {
-//                         'Accept': 'application/json',
-//                         'Content-Type': 'application/json',
-//                         'x-access-token': token,
-//                     }});
-//                     let response = await res.json();
-//                     console.log(response)
-//                     // this.props.navigation.navigate('History',{data:response})
-//                 } catch (error) {
-//                     console.error(error.message)
-//                 }
-//             }
+            else {
+                let res = await fetch(SERVER_IP+'api/v1/listUser', {
+                    method: 'GET',
+                    headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'x-access-token': token,
+                    },
+                    });
+                    let response = await res.json();
+                    console.log(response.data)
+                    this.props.navigation.navigate('ManageUser',{data:response.data.listUsers})
+            }
 
             this.setState({
                 username: '',
@@ -99,7 +87,7 @@ class AddUserScreen extends React.Component {
                             value={this.state.username}
                             onChangeText={(text) => this.setState({ username: text,  checkLogin: false })}
                         />
-                        {this.state.checkLogin ? <Text style={{color:'#FF7F50',paddingLeft:3,fontStyle: 'italic'}}>wrong username or password</Text> : null}
+                        {this.state.checkLogin ? <Text style={{color:'#FF7F50',paddingLeft:3,fontStyle: 'italic'}}>username already exists</Text> : null}
                     </View>
                     <View style={styles.textInputContainer}>
                         <Text style={{ paddingLeft: 3, color: 'red' }}>Email</Text>
@@ -114,7 +102,7 @@ class AddUserScreen extends React.Component {
                             value={this.state.email}
                             onChangeText={(text) => this.setState({ email: text,  checkLogin: false })}
                         />
-                        {this.state.checkLogin ? <Text style={{color:'#FF7F50',paddingLeft:3,fontStyle: 'italic'}}>wrong username or password</Text> : null}
+                        {this.state.checkLogin ? <Text style={{color:'#FF7F50',paddingLeft:3,fontStyle: 'italic'}}>username already exists</Text> : null}
                     </View>
                     <View style={styles.textInputContainer}>
                         <Text style={{ paddingLeft: 3, color: 'red' }}>Password</Text>

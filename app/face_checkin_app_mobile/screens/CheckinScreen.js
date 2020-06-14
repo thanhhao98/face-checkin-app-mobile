@@ -85,7 +85,6 @@ export default class CheckinScreen extends React.Component {
   }
   takePicture = async () => {
 
-	  console.log(SERVER_IP+'api/vi/checkFace')
 		if (this.camera) {
 			this.setState({
 				username: '',
@@ -124,7 +123,6 @@ export default class CheckinScreen extends React.Component {
 				}
 			}
 		} else {
-			console.log('setcamera')
 			this.setState({
 				username: '',
 				status: '',

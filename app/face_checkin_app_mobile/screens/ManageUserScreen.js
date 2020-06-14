@@ -10,24 +10,7 @@ export default class ManageUserScreen extends React.Component {
 
         this.state = {
             date: '',
-            data: [
-                {
-                    username:'thuan',
-                    userId: '10'
-                },
-                {
-                    username:'ronaldo',
-                    userId:'2'
-                },
-                {
-                    username:'benzema',
-                    userId: '3'
-                },
-                {
-                    username:'bruyne',
-                    userId:'7'
-                }
-            ],
+            data: [],
         }
         
     }
@@ -43,12 +26,20 @@ export default class ManageUserScreen extends React.Component {
 						 },
 				 });
 				 let response = await res.json();
-			   console.log(response)
 				 this.setState({
 						 data:response.data.listUsers
 				 })
 
 		 }
+	async componentDidUpdate(prevProps){
+		const {data} = this.props.route.params;
+        if(this.props.route.params && this.props.route.params !== prevProps.route.params) {
+										const {data} =  this.props.route.params;
+                    this.setState({
+                        data: data,
+                    })
+                }
+	}
 
     render() {
         return (
@@ -74,9 +65,7 @@ export default class ManageUserScreen extends React.Component {
                 <Text style={styles.item}>{item.username}</Text>
                 </TouchableOpacity>}
                 />
-               
-            
-           
+
             </View>
         )
     }

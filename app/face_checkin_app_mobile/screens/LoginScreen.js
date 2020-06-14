@@ -47,7 +47,7 @@ class LoginScreen extends React.Component {
                     await AsyncStorage.setItem('isLogin', 'true');
                     await AsyncStorage.setItem('token', token.toString())
 
-                    //get data for manage history screen
+            //        get data for manage history screen
                     let res = await fetch(SERVER_IP+"api/v1/getCheckHistory", {
                     method: 'GET',
                     headers: {
@@ -56,7 +56,8 @@ class LoginScreen extends React.Component {
                         'x-access-token': token,
                     }});
                     let response = await res.json();
-                    this.props.navigation.navigate('History',{data:response})
+
+                    this.props.navigation.navigate('History',{data:response.data})
 
                 } catch (error) {
                     console.error(error.message)

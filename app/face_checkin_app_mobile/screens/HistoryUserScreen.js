@@ -2,7 +2,8 @@ import React from 'react';
 import { StyleSheet, View, Text , FlatList, Dimensions, StatusBar, AsyncStorage} from 'react-native';
 import DatePicker from 'react-native-datepicker';
 import { Button } from 'react-native-paper';
-import Header from '../components/header' 
+import Header from '../components/header';
+import {SERVER_IP} from '../Config';
 
 var devicewidth = Dimensions.get('window').width;
 
@@ -22,7 +23,6 @@ export default class HistoryUserScreen extends React.Component {
     
     constructor (props) {
         super(props);
-        // console.log(props.navigation.getParam('respone'))
         this.state = {
             date: '',
             alldata:[],
@@ -30,11 +30,10 @@ export default class HistoryUserScreen extends React.Component {
             username: '',
         }
     }
-    async componentDidUpdate(prevProps){
-        if(this.props.route.params !== prevProps.route.params) {
-            const {data} =  this.props.route.params;
-        let token = await AsyncStorage.getItem('token') || false;
 
+    async componentDidMount(){
+        let token = await AsyncStorage.getItem('token') || false;
+        const {data} =  this.props.route.params;
             let res = await fetch(SERVER_IP+`api/v1/getCheckHistoryWithUserId/${data}`, {
                 method: 'GET',
                 headers: {
@@ -44,14 +43,32 @@ export default class HistoryUserScreen extends React.Component {
                 },
             });
             let response = await res.json();
-            console.log(await response,'respones')
             this.setState({
-                data: response.data,
-                alldata: response.data,
-                username: response.data[0].username,
+                data: response.data.data,
+                alldata: response.data.data,
+                username: response.data.username,
+            })
+    }
+
+    async componentDidUpdate(prevProps){
+        if(this.props.route.params !== prevProps.route.params) {
+            const {data} =  this.props.route.params;
+            let token = await AsyncStorage.getItem('token') || false;
+            let res = await fetch(SERVER_IP+`api/v1/getCheckHistoryWithUserId/${data}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'x-access-token': token,
+                },
+            });
+            let response = await res.json();
+            this.setState({
+                data: response.data.data,
+                alldata: response.data.data,
+                username: response.data.username,
             })
 
-            // console.warn(data,'111111111111111111111111111111')
         }
     }
     checkinLate(){
@@ -59,8 +76,8 @@ export default class HistoryUserScreen extends React.Component {
             return !item.checkin.onTime
         })
         this.setState({data})
-        console.log(data,'55555555555555555555555')
     }
+    
     render() {
         const title = this.state.username+"'s History"
         return (
@@ -106,17 +123,21 @@ export default class HistoryUserScreen extends React.Component {
                     <Button onPress={()=>this.setState({data:this.state.alldata})}> Show All</Button>
                     <Button onPress={()=>{this.checkinLate()}}>Checkin Late</Button>
                 </View>
+                {/* {this.state.alldata.length === 0? <Text>Khong co data</Text>:<Text>Co data</Text>} */}
+                {this.state.alldata.length === 0? 
+                <Text>No data</Text>:
                 <FlatList
                     style={styles.flatlist}
-                    const data = {this.state.data}
+                    const data = {this.state.alldata}
                     renderItem={({item}) => 
                     <Item 
                         title={item.checkin.time.substring(0,16)} 
                         checkin={item.checkin.time.substring(17,25)} 
-                        checkout={item.checkout.time.substring(17,25)}
+                        checkout={item.checkout? item.checkout.time.substring(17,25):" "}
                     />}
                     keyExtractor={(item, index) => index.toString()} 
                 />
+                }
             </View>
         )
     }

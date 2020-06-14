@@ -1,8 +1,10 @@
 import React from 'react';
-import { StyleSheet, View, Text , FlatList, Dimensions, StatusBar} from 'react-native';
+import { StyleSheet, View, Text , FlatList, Dimensions, StatusBar, AsyncStorage} from 'react-native';
 import DatePicker from 'react-native-datepicker';
 import { Button } from 'react-native-paper';
 import Header from '../components/header' 
+import {SERVER_IP} from '../Config'
+
 
 var devicewidth = Dimensions.get('window').width;
 
@@ -22,42 +24,47 @@ export default class HistoryScreen extends React.Component {
     
     constructor (props) {
         super(props);
-        // console.log(props.navigation.getParam('respone'))
         this.state = {
             date: '',
             alldata:[],
             data: [],
         }
-    }
-    componentDidMount(){
-            const {data} =  this.props.route.params;
-            this.setState({
-                data: data.data,
-                alldata: data.data,
-            })
-
-            console.warn(data,'111111111111111111111111111111')
+    }    
+    async componentDidMount(){
+        let token = await AsyncStorage.getItem('token') || false;
+        let res = await fetch(SERVER_IP+"api/v1/getCheckHistory", {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'x-access-token': token,
+            }});
+        let response = await res.json();
+        this.setState({
+            data:response.data,
+            alldata: response.data
+        })
     }
     
-    componentDidUpdate(prevProps){
-        if(this.props.route.params !== prevProps.route.params) {
-            const {data} =  this.props.route.params;
-            this.setState({
-                data: data.data,
-                alldata: data.data,
-            })
-
-            console.warn(data,'111111111111111111111111111111')
-        }
+    componentDidUpdate(prevProps) {
+        const {data} = this.props.route.params;
+        if(this.props.route.params && this.props.route.params !== prevProps.route.params) {
+                    const {data} =  this.props.route.params;
+                    this.setState({
+                        data: data,
+                        alldata: data,
+                    })
+                }
     }
+
     checkinLate(){
         const data = this.state.alldata.filter(item=>{
             return !item.checkin.onTime
         })
         this.setState({data})
-        console.log(data,'55555555555555555555555')
     }
     render() {
+        
         return (
             <View style={styles.container}>
                 <StatusBar barStyle="dark-content" hidden={false} backgroundColor="#0a4ff0" translucent={true} />
@@ -107,8 +114,8 @@ export default class HistoryScreen extends React.Component {
                     renderItem={({item}) => 
                     <Item 
                         title={item.checkin.time.substring(0,16)} 
-                        checkin={item.checkin.time.substring(17,25)} 
-                        checkout={item.checkout.time.substring(17,25)}
+                        checkin={item.checkin.time.substring(16,25)} 
+                        checkout={item.checkout.time.substring(16,25)}
                     />}
                     keyExtractor={(item, index) => index.toString()} 
                 />
