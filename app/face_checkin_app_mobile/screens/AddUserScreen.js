@@ -2,6 +2,8 @@ import React from 'react';
 import { StyleSheet, View, Text, TextInput, StatusBar, AsyncStorage } from 'react-native';
 import { Title, Button } from 'react-native-paper';
 import {SERVER_IP} from '../Config.js'
+import Header from '../components/header.js'
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 
 class AddUserScreen extends React.Component {
@@ -69,13 +71,12 @@ class AddUserScreen extends React.Component {
     render() {
         return (
             <View style={styles.container}>
-
                 <StatusBar barStyle="dark-content" hidden={false} backgroundColor="#0a4ff0" translucent={true} />
+                <Header style={styles.new_header} title="Add User" navigation={this.props.navigation}/>
                 <View style={styles.down}>
-                    <Title style={{ color: 'blue' }} >Login to your account</Title>
-                    {/* <Paragraph> Hi there! Nice to see you again.</Paragraph> */}
+                    <Title style={{ color: 'blue' }} >Create new account</Title>
                     <View style={styles.textInputContainer}>
-                        <Text style={{ paddingLeft: 3, color: 'red' }}>Username</Text>
+                        <Text style={{ paddingLeft: 3, color: 'red', fontSize:18 }}>Username</Text>
                         <TextInput
                             style={styles.textInput}
                             placeholder='Enter your username'
@@ -90,7 +91,7 @@ class AddUserScreen extends React.Component {
                         {this.state.checkLogin ? <Text style={{color:'#FF7F50',paddingLeft:3,fontStyle: 'italic'}}>username already exists</Text> : null}
                     </View>
                     <View style={styles.textInputContainer}>
-                        <Text style={{ paddingLeft: 3, color: 'red' }}>Email</Text>
+                        <Text style={{ paddingLeft: 3, color: 'red', fontSize:18 }}>Email</Text>
                         <TextInput
                             style={styles.textInput}
                             placeholder='Enter your email'
@@ -105,7 +106,7 @@ class AddUserScreen extends React.Component {
                         {this.state.checkLogin ? <Text style={{color:'#FF7F50',paddingLeft:3,fontStyle: 'italic'}}>username already exists</Text> : null}
                     </View>
                     <View style={styles.textInputContainer}>
-                        <Text style={{ paddingLeft: 3, color: 'red' }}>Password</Text>
+                        <Text style={{ paddingLeft: 3, color: 'red', fontSize:18 }}>Password</Text>
                         <View sytle={{ flexDirection: 'row' }}>
                             <TextInput
                                 style={styles.textInput}
@@ -122,7 +123,6 @@ class AddUserScreen extends React.Component {
                             
                         </View>
                     </View>
-                    
                     <Button style={styles.buttonSignIn} onPress={this.sendData} >Sign Up</Button>
 
                 </View>
@@ -138,24 +138,17 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'stretch',
     },
-    up: {
-        flex: 3,
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'center'
+    new_header:{
+        // marginTop:-20
     },
     down: {
         flex: 7,
         flexDirection: 'column',
         justifyContent: 'flex-start',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginTop:100
     },
-    title: {
-        color: 'white',
-        textAlign: 'center',
-        width: 400,
-        fontSize: 23
-    },
+   
     textInputContainer: {
         paddingHorizontal: 10,
         borderRadius: 6,
@@ -171,7 +164,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         borderRadius: 6,
         marginTop: 20,
-        backgroundColor: 'red',
+        backgroundColor: '#4179f7',
         // color: 'white',
         textAlign: 'center',
         width: 280,

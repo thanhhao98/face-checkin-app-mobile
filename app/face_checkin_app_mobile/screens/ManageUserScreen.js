@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, TextInput, StatusBar, FlatList, AsyncStorage}  from 'react-native';
+import { StyleSheet, View, Text, TextInput, StatusBar, FlatList, AsyncStorage, Dimensions}  from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Header from '../components/header'
 import {SERVER_IP} from '../Config'
@@ -54,10 +54,13 @@ export default class ManageUserScreen extends React.Component {
                 ({item}) => 
                 <TouchableOpacity
                     style={{ 
-                    flex:1, 
-                    flexDirection: "row",
-                    borderBottomColor: '#ddd',
-                    borderBottomWidth:2,
+											flex:1, 
+											flexDirection: "row",
+											borderBottomColor: '#ddd',
+											borderBottomWidth:2,
+											// paddingLeft:20,
+											size:25,
+											justifyContent:"center"
                     }}
                     onPress={()=>this.props.navigation.navigate('HistoryUser',{data:item.userId})}
                 >
@@ -74,13 +77,14 @@ const styles = StyleSheet.create({
     container : {
         flex: 1,
         backgroundColor: '#fff',
-        alignItems: 'center',
+				alignItems: 'center',
+				// marginTop:20,
     },
     headerContainer :{
         backgroundColor: "#ddd",
         justifyContent: 'center',
         // alignItems: 'center',
-        flexDirection: 'row'
+				flexDirection: 'row',
     },
     inputContainer: {
         flexDirection: 'row'
@@ -89,12 +93,11 @@ const styles = StyleSheet.create({
     list: {
         marginLeft:20,
         marginRight:20,
-        marginTop: 25,
+        marginTop: 50,
         alignSelf: 'stretch',
-        maxHeight: 420
+        maxHeight: "100%"
     },
     item: {
-        // paddingLeft: 50,
         paddingTop: 10,
         paddingBottom: 10,
         paddingRight: 10,

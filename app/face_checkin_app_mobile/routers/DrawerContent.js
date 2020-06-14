@@ -11,12 +11,15 @@ import {
   DrawerItem
 } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon2 from 'react-native-vector-icons/Ionicons';
 import {SERVER_IP} from '../Config.js'
 
 
 export function DrawerContent(props) {
   const [isLogin, setLogin] = useState(false);
   const [isAdmin, setAdmin] = useState(false);
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   useEffect(() => {
     //check user
     try {
@@ -29,12 +32,18 @@ export function DrawerContent(props) {
         else{
           let checkAdmin = await AsyncStorage.getItem('isAdmin') || false;
           let checkLogin = await AsyncStorage.getItem('isLogin') || false;
+          let username   = await AsyncStorage.getItem('username') || '';
+          let email      = await AsyncStorage.getItem('email') || '';
+          setUsername(username);
+          setEmail(email);
         if (checkAdmin === 'true') {
           setAdmin(true);
-          setLogin(true)
+          setLogin(true);
+
         }
         else if (checkLogin === 'true') {
-          setLogin(true)
+          setLogin(true);
+
         }
         else {
           setAdmin(false);
@@ -48,6 +57,7 @@ export function DrawerContent(props) {
     }
   });
 
+
   async function callApiHistory() {
     let token = await AsyncStorage.getItem('token') || false;
     let res = await fetch(SERVER_IP+"api/v1/getCheckHistory", {
@@ -58,8 +68,6 @@ export function DrawerContent(props) {
           'x-access-token': token,
       }});
       let response = await res.json();
-      console.log('calll history')
-
       const redirect = response.status? props.navigation.navigate('History', {data: response.data}) :  props.navigation.navigate('Login')
   }
 
@@ -68,20 +76,18 @@ export function DrawerContent(props) {
       <View style={{ flex: 1 }}>
         <DrawerContentScrollView {...props}>
           <View styles={styles.drawerContent}>
+            
+
             <View style={styles.userInfoSection}>
               <View style={{ marginTop: 15 }}>
-                <Avatar.Image
-                  source={{
-                    uri: 'http://streaming1.danviet.vn/upload/2-2018/images/2018-06-21/anh-1-1529571305-width650height1018.jpg',
-                  }}
-                  size={50}
-                />
+                <Icon2 name="md-person" size={50}/>
               </View>
               <View style={{ marginLeft: 15, marginTop: 15 }}>
-                <Title style={styles.title}>Mai Van Hao</Title>
-                <Caption style={styles.caption}>maihao1997@gmail.com</Caption>
+                <Title style={styles.title}></Title>
+                <Caption style={styles.caption}></Caption>
               </View>
             </View>
+
 
             <Drawer.Section style={styles.drawerSection}>
               <DrawerItem
@@ -117,18 +123,14 @@ export function DrawerContent(props) {
         <View style={{ flex: 1 }}>
           <DrawerContentScrollView {...props}>
             <View styles={styles.drawerContent}>
+
               <View style={styles.userInfoSection}>
                 <View style={{ marginTop: 15 }}>
-                  <Avatar.Image
-                    source={{
-                      uri: 'http://streaming1.danviet.vn/upload/2-2018/images/2018-06-21/anh-1-1529571305-width650height1018.jpg',
-                    }}
-                    size={50}
-                  />
+                  <Icon2 name="md-person" size={50}/>
                 </View>
                 <View style={{ marginLeft: 15, marginTop: 15 }}>
-                  <Title style={styles.title}>Mai Van Hao</Title>
-                  <Caption style={styles.caption}>maihao1997@gmail.com</Caption>
+                  <Title style={styles.title}>{username}</Title>
+                  <Caption style={styles.caption}>{email}</Caption>
                 </View>
               </View>
 
@@ -199,16 +201,11 @@ export function DrawerContent(props) {
             <View styles={styles.drawerContent}>
               <View style={styles.userInfoSection}>
                 <View style={{ marginTop: 15 }}>
-                  <Avatar.Image
-                    source={{
-                      uri: 'http://streaming1.danviet.vn/upload/2-2018/images/2018-06-21/anh-1-1529571305-width650height1018.jpg',
-                    }}
-                    size={50}
-                  />
+                  <Icon2 name="md-person" size={50}/>
                 </View>
                 <View style={{ marginLeft: 15, marginTop: 15 }}>
-                  <Title style={styles.title}>Mai Van Hao</Title>
-                  <Caption style={styles.caption}>maihao1997@gmail.com</Caption>
+                  <Title style={styles.title}>{username}</Title>
+                  <Caption style={styles.caption}>{email}</Caption>
                 </View>
               </View>
 

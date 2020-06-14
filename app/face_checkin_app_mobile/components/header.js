@@ -6,7 +6,7 @@ const statusbarHeight = StatusBar.currentHeight;
 
 export default function Header ({navigation,title, isStatus, isBack}) {
     return (
-            <View style={styles.header}>
+            <View style={[styles.header, isStatus ? styles.threeItem:styles.twoItem]}>
                 {isBack? <Icon.Button 
                     name="ios-arrow-round-back" 
                     size= {28}
@@ -21,7 +21,7 @@ export default function Header ({navigation,title, isStatus, isBack}) {
                 <Text style={styles.headerText}>{title}</Text>
                 {isStatus? <Icon.Button
                     name="ios-add"
-                    size={28}
+                    size={35}
                     style={styles.icon2}
                     onPress={()=>navigation.navigate('AddUser')}
                 /> : null}
@@ -30,14 +30,19 @@ export default function Header ({navigation,title, isStatus, isBack}) {
         )
 }
 const styles = StyleSheet.create({
+    twoItem :{
+        justifyContent: 'flex-start',
+    },
+    threeItem: {
+        justifyContent: 'space-between',
+    },
     header: {
         width: '100%',
         height: '8%',
         top:statusbarHeight,
         flexDirection: "row",
         alignItems: 'center',
-        justifyContent: 'flex-start',
-        backgroundColor:'#4179f7',
+        backgroundColor:'#007aff',
     },
     headerText: {
         fontWeight: 'bold',
@@ -48,11 +53,9 @@ const styles = StyleSheet.create({
     },
     icon: {
         paddingLeft:20,
-        backgroundColor: "#4179f7"
+        backgroundColor: "#007aff"
     },
     icon2: {
-        // position:'absolute',
-        // marginLeft:20,
-        backgroundColor: "#4197f7"
+        color:"#4197f7",
     }
 })

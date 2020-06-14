@@ -4,6 +4,7 @@ import { Title, Button } from 'react-native-paper';
 import Header from '../components/header';
 import Loader from '../components/loader';
 import {SERVER_IP} from '../Config.js'
+import { TouchableOpacity } from 'react-native-gesture-handler';
 class LoginScreen extends React.Component {
     constructor(props) {
         super(props);
@@ -42,11 +43,14 @@ class LoginScreen extends React.Component {
             else {
                 let isAdmin = response.data.isAdmin;
                 let token = response.data.token;
+                let username = response.data.username;
+                let email = response.data.email;
                 try {
                     await AsyncStorage.setItem('isAdmin', isAdmin.toString());
                     await AsyncStorage.setItem('isLogin', 'true');
-                    await AsyncStorage.setItem('token', token.toString())
-
+                    await AsyncStorage.setItem('token', token.toString());
+                    await AsyncStorage.setItem('username', username.toString());
+                    await AsyncStorage.setItem('email', email.toString());
             //        get data for manage history screen
                     let res = await fetch(SERVER_IP+"api/v1/getCheckHistory", {
                     method: 'GET',
@@ -79,14 +83,12 @@ class LoginScreen extends React.Component {
     render() {
         return (
             <View style={styles.container}>
-             <Loader
-                    loading={this.state.isLoading} />
                 <StatusBar barStyle="dark-content" hidden={false} backgroundColor="#0a4ff0" translucent={true} />
                 <Header title="Login" navigation={this.props.navigation}/>
                 <View style={styles.down}>
                     {/* <Paragraph> Hi there! Nice to see you again.</Paragraph> */}
                     <View style={styles.textInputContainer}>
-                        <Text style={{ paddingLeft: 3, color: 'red' }}>Email</Text>
+                        <Text style={{ paddingLeft: 3, color: 'red', fontSize:20 }}>Email</Text>
                         <TextInput
                             style={styles.textInput}
                             placeholder='Enter your email'
@@ -101,7 +103,7 @@ class LoginScreen extends React.Component {
                         {this.state.checkLogin ? <Text style={{color:'#FF7F50',paddingLeft:3,fontStyle: 'italic'}}>wrong username or password</Text> : null}
                     </View>
                     <View style={styles.textInputContainer}>
-                        <Text style={{ paddingLeft: 3, color: 'red' }}>Password</Text>
+                        <Text style={{ paddingLeft: 3, color: 'red',fontSize:20 }}>Password</Text>
                         <View sytle={{ flexDirection: 'row' }}>
                             <TextInput
                                 style={styles.textInput}
@@ -118,6 +120,7 @@ class LoginScreen extends React.Component {
                             
                         </View>
                     </View>
+                    {/* <TouchableOpacity style=></TouchableOpacity> */}
                     <Button style={styles.buttonSignIn} onPress={this.sendData} >Sign In</Button>
 
                 </View>
@@ -160,16 +163,16 @@ const styles = StyleSheet.create({
     },
     textInput: {
         width: 280,
-        height: 45,
-
+        height: 50,
+        fontSize:18
     },
     buttonSignIn: {
         paddingHorizontal: 10,
-        borderRadius: 6,
+        borderRadius: 10,
         marginTop: 20,
-        backgroundColor: 'red',
-        // color: 'white',
+        backgroundColor: '#4179f7',
         textAlign: 'center',
+        justifyContent:"center",
         width: 280,
         height: 45,
     }
