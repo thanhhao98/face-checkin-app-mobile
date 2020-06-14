@@ -14,7 +14,7 @@ import {RNCamera}  from 'react-native-camera';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { ProgressBar} from 'react-native-paper';
 import Header from '../components/header';
-
+import {SERVER_IP} from '../Config.js'
 export default class CheckinScreen extends React.Component {
   constructor() {
     super();
@@ -84,6 +84,8 @@ export default class CheckinScreen extends React.Component {
 		);
   }
   takePicture = async () => {
+
+	  console.log(SERVER_IP+'api/vi/checkFace')
 		if (this.camera) {
 			this.setState({
 				username: '',
@@ -93,7 +95,7 @@ export default class CheckinScreen extends React.Component {
 			while(true){
 				const options = { quality: 0.5, base64: true};
 				const data = await this.camera.takePictureAsync(options);
-				let res = await fetch("http://192.168.2.18:5000/api/v1/checkFace", {
+				let res = await fetch(SERVER_IP+'api/v1/checkFace', {
 				method: 'POST',
 				headers: {
 					'Accept': 'application/json',

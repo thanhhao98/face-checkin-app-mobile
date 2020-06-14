@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Text, TextInput, StatusBar, AsyncStorage } from 'react-native';
 import { Title, Button } from 'react-native-paper';
+import {SERVER_IP} from '../Config.js'
 
 
 class AddUserScreen extends React.Component {
@@ -22,7 +23,8 @@ class AddUserScreen extends React.Component {
                 password: this.state.password
             }
             let post = { data }
-            let res = await fetch('http://192.168.2.18:5000/api/v1/createUser', {
+		console.log(SERVER_IP+'api/v1/createUser')
+		let res = await fetch(SERVER_IP+'api/v1/createUser', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',

@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, View, Text, TextInput, StatusBar, FlatList}  from 'react-native';
+import { StyleSheet, View, Text, TextInput, StatusBar, FlatList, AsyncStorage}  from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Header from '../components/header'
+import {SERVER_IP} from '../Config'
 
 export default class ManageUserScreen extends React.Component {
     constructor () {
@@ -27,28 +28,27 @@ export default class ManageUserScreen extends React.Component {
                     userId:'7'
                 }
             ],
-            modalVisible: false,
         }
         
     }
 
-    // async componentDidUpdate(prevProps){
+	async componentDidMount(){
+				 let token = await AsyncStorage.getItem('token') || false;
+				 let res = await fetch(SERVER_IP+'api/v1/listUser', {
+						 method: 'GET',
+						 headers: {
+								 'Accept': 'application/json',
+								 'Content-Type': 'application/json',
+								 'x-access-token': token,
+						 },
+				 });
+				 let response = await res.json();
+			   console.log(response)
+				 this.setState({
+						 data:response.data.listUsers
+				 })
 
-    //     let token = await AsyncStorage.getItem('token') || false;
-    //     let res = await fetch('http://192.168.2.18:5000/api/v1/getAllCheckHistory', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Accept': 'application/json',
-    //             'Content-Type': 'application/json',
-    //             'x-access-token': token,
-    //         },
-    //     });
-    //     let response = await res.json();
-    //     this.setState({
-    //         data:response.data
-    //     })
-
-    // }
+		 }
 
     render() {
         return (

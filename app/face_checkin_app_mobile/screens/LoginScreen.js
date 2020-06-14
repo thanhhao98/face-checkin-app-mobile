@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, TextInput, StatusBar, AsyncStorage } from 'reac
 import { Title, Button } from 'react-native-paper';
 import Header from '../components/header';
 import Loader from '../components/loader';
+import {SERVER_IP} from '../Config.js'
 class LoginScreen extends React.Component {
     constructor(props) {
         super(props);
@@ -10,7 +11,7 @@ class LoginScreen extends React.Component {
             username: '',
             password: '',
             checkLogin: false,
-            isLoading: true,
+            isLoading: false,
         }
     }
     sendData = async (props) => {
@@ -20,7 +21,7 @@ class LoginScreen extends React.Component {
                 password: this.state.password
             }
             let post = { data }
-            let res = await fetch('http://192.168.2.18:5000/api/v1/login', {
+            let res = await fetch(SERVER_IP+'api/v1/login', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -36,6 +37,7 @@ class LoginScreen extends React.Component {
                 this.setState({
                     checkLogin: true
                 })
+
             }
             else {
                 let isAdmin = response.data.isAdmin;
@@ -46,7 +48,7 @@ class LoginScreen extends React.Component {
                     await AsyncStorage.setItem('token', token.toString())
 
                     //get data for manage history screen
-                    let res = await fetch("http://192.168.2.18:5000/api/v1/getCheckHistory", {
+                    let res = await fetch(SERVER_IP+"api/v1/getCheckHistory", {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
@@ -55,6 +57,7 @@ class LoginScreen extends React.Component {
                     }});
                     let response = await res.json();
                     this.props.navigation.navigate('History',{data:response})
+
                 } catch (error) {
                     console.error(error.message)
                 }
@@ -64,7 +67,6 @@ class LoginScreen extends React.Component {
                 username: '',
                 password: ''
             })
-            // AsyncStorage.setItem('aaaaa','asdfasdfg7h9832j0p')
         } catch (e) {
             console.error(e)
         }

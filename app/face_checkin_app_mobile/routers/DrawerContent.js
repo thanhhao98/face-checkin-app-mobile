@@ -16,13 +16,11 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 export function DrawerContent(props) {
   const [isLogin, setLogin] = useState(false);
   const [isAdmin, setAdmin] = useState(false);
-  console.log(isLogin,'islogin')
   useEffect(() => {
     //check user
     try {
       async function checkAsyncStorage() {
         let token = await AsyncStorage.getItem('token') || false;
-        console.log(token,'token')
         if(!token){
           setAdmin(false);
           setLogin(false);
@@ -30,9 +28,6 @@ export function DrawerContent(props) {
         else{
           let checkAdmin = await AsyncStorage.getItem('isAdmin') || false;
         let checkLogin = await AsyncStorage.getItem('isLogin') || false;
-        console.log(checkLogin,'check login')
-        console.log(checkAdmin,'check AcheckAdmin')
-
         if (checkAdmin === 'true') {
           setAdmin(true);
           setLogin(true)
@@ -175,7 +170,7 @@ export function DrawerContent(props) {
               label='Logout'
               onPress={async () => {
                 await AsyncStorage.clear();
-                props.navigation.navigate('Checkin')
+								props.navigation.navigate('Login')
               }}
             />
           </Drawer.Section>
@@ -240,9 +235,7 @@ export function DrawerContent(props) {
                 const temp = await AsyncStorage.removeItem('token');
                 const temp1 = await AsyncStorage.removeItem('isAdmin');
                 const temp2 = await AsyncStorage.removeItem('isUser');
-                console.log(await 'hao dep trai')
-                console.log(await AsyncStorage.getItem('isUser'),'000000000000000000000')
-                await props.navigation.navigate('Checkin')
+								await props.navigation.navigate('Login')
               }}
             />
           </Drawer.Section>

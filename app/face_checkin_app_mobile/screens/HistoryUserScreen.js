@@ -35,7 +35,7 @@ export default class HistoryUserScreen extends React.Component {
             const {data} =  this.props.route.params;
         let token = await AsyncStorage.getItem('token') || false;
 
-            let res = await fetch(`http://192.168.2.18:5000//api/v1/getCheckHistoryWithUserId/${data}`, {
+            let res = await fetch(SERVER_IP+`api/v1/getCheckHistoryWithUserId/${data}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',

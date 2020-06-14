@@ -143,9 +143,15 @@ def adminRequired(f):
             return jsonify({'message':
                             'Token is not valid!, Login required'}), 401
         return f(currentUser, *args, **kwargs)
-
     return decorated
 
+@app.route('/api/v1/listUser', methods=['GET'])
+@adminRequired
+def listUser(currentUser):
+    if request.method == 'GET':
+        users = User.query.all()
+        result = [{'userId': user.id, 'username': user.username} for user in users]
+        return jsonify({'status': True, 'message': 'Successfully', 'data': {'listUsers': result}})
 
 @app.route('/api/v1/createUser', methods=['POST'])
 @adminRequired
@@ -417,9 +423,7 @@ def getHistoryOfUser(currentUser):
             },
             'checkout': checkoutRecord
         }
-        print('ok')
         print(check.checkoutTime.strftime('%a %b %d %Y %H:%M:%S %Z%z'))
-        print('ok1')
         data.append(record)
     return jsonify({'status': True, 'message': '', 'data': data})
 
