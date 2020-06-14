@@ -320,6 +320,7 @@ def login():
             'data': {
                 'isAdmin': user.isAdmin,
                 'username': user.username,
+                'email': user.email,
                 'token': token.decode('UTF-8'),
             }
         })
