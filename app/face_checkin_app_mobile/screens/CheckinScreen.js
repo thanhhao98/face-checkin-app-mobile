@@ -36,7 +36,7 @@ export default class CheckinScreen extends React.Component {
 					ref={ref => {
 						this.camera = ref;
 						}}
-						style={[styles.preview, { transform: [{rotateY: '180deg'}]   }]}
+						style={[styles.preview ]}
 						type={RNCamera.Constants.Type.front}
 						androidCameraPermissionOptions={{
 							title: 'Permission to use camera',
@@ -56,29 +56,35 @@ export default class CheckinScreen extends React.Component {
 				<View style={{marginTop:StatusBar.currentHeight}}>
 					<ProgressBar indeterminate={true} visible={this.state.progressBar}/>
 				</View>
-				<View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center'  }}>
-					<TouchableOpacity
-						onPress={this.takePicture.bind(this)} style={styles.capture}
-					>
-						<Icon
-							name="camera"
-							size={40}
-							style={{ color:"white", textAlign:"center", marginTop:5  }}
+				<View style={{ flex: 0, flexDirection: 'column', justifyContent: 'center'  }}>
+					<View sytle={{flex:2}}>
+						<TouchableOpacity
+							onPress={this.takePicture.bind(this)} style={styles.capture}
 						>
-						</Icon>
-					</TouchableOpacity>
+							<Icon
+								name="camera"
+								size={40}
+								style={{ color:"white", textAlign:"center", marginTop:5  }}
+							>
+							</Icon>
+						</TouchableOpacity>
+					</View>
 				</View>
-				<View>
-					<Text
-						style={{textAlign: 'center'}}
-					>
-						{this.state.username}
-					</Text>
-					<Text
-						style={{textAlign: 'center'}}
-					>
-						{this.state.status}
-					</Text>
+				<View style={{flex:1}}>
+					{this.state.username.length ? (
+						<Text
+							style={{textAlign: 'center', fontSize:20, fontWeight: "bold", color: "blue", marginTop: 20}}
+						>
+							Hello: {this.state.username}
+						</Text>
+					):(
+						<Text
+							style={{textAlign: 'center', fontSize:20, color: "red", marginTop: 20}}
+						>
+							{this.state.status}
+						</Text>
+					)}
+					
 				</View>
 			</View>
 		);
@@ -95,12 +101,10 @@ export default class CheckinScreen extends React.Component {
 		if (this.camera) {
 			await this.setState({
 				username: '',
-				status: 'Checking',
 				progressBar: true,
 			})	
 			console.log(this.state.progressBar)
 			while(this.state.progressBar){
-				console.log('checkin')
 				const options = { quality: 0.5, base64: true};
 				const data = await this.camera.takePictureAsync(options);
 				let res = await fetch(SERVER_IP+'api/v1/checkFace', {
