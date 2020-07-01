@@ -170,34 +170,35 @@ def createUser(currentUser):
                        email=data['email'],
                        password=hashedPassword,
                        isAdmin=False)
-        # data = request.json['data']['img']
-        # img = readb64(data)
-        # bboxes, face = detector.align(img)
-        # if bboxes is None:
-            # return jsonify({'status': False, 'message': 'There are no face', 'data': {}})
-        # error, errorMsg = checkConstraint(bboxes, face)
-        # if error:
-            # return jsonify({'status': False, 'message': errorMsg, 'data': {'bboxes': bboxes.tolist()}})
-        # img = np.array(face)[..., ::-1]
-        # subPath = os.path.join(app.config['PATH_DATA_FOLDERS'], newUser.username)
-        # newUser.pathToEmbedding = subPath
-        # pathEmbedding = os.path.join(app.root_path, subPath)
-        # if os.path.isdir(pathEmbedding):
-            # return jsonify({'status': False, 'message': 'username is exist', 'data': {}})
-        # os.makedirs(pathEmbedding)
-        # pathImage = os.path.join(pathEmbedding, str(round(time.time() * 100)) + '.jpg')
-        # cv2.imwrite(pathImage, img)
-        # pathEmbedding = os.path.join(pathEmbedding,
-                                     # app.config['NAME_FILE_EMBEDDING'])
-        # embedder.dump_embedding(img, pathEmbedding)
-        # return jsonify({
-            # 'status': True,
-            # 'message': 'Add face for user successfully',
-            # 'data': {'bbox': bboxes[0].tolist()}
-        # })
+        data = request.json['data']['img']
+        img = readb64(data)
+        bboxes, face = detector.align(img)
+        if bboxes is None:
+            return jsonify({'status': False, 'message': 'There are no face', 'data': {}})
+        error, errorMsg = checkConstraint(bboxes, face)
+        if error:
+            return jsonify({'status': False, 'message': errorMsg, 'data': {'bboxes': bboxes.tolist()}})
+        img = np.array(face)[..., ::-1]
+        subPath = os.path.join(app.config['PATH_DATA_FOLDERS'], newUser.username)
+        newUser.pathToEmbedding = subPath
+        pathEmbedding = os.path.join(app.root_path, subPath)
+        if os.path.isdir(pathEmbedding):
+            return jsonify({'status': False, 'message': 'username is exist', 'data': {}})
+        os.makedirs(pathEmbedding)
+        pathImage = os.path.join(pathEmbedding, str(round(time.time() * 100)) + '.jpg')
+        cv2.imwrite(pathImage, img)
+        pathEmbedding = os.path.join(pathEmbedding,
+                                     app.config['NAME_FILE_EMBEDDING'])
+        embedder.dump_embedding(img, pathEmbedding)
         db.session.add(newUser)
         db.session.commit()
-        return jsonify({'status': True, 'message': 'User added successfully', 'data': []})
+        print('success')
+        return jsonify({
+            'status': True,
+            'message': 'Add face for user successfully',
+            'data': {'bbox': bboxes[0].tolist()}
+        })
+        # return jsonify({20'status': True, 'message': 'User added successfully', 'data': []})
 
 
 @app.route('/api/v1/addFaceUser', methods=['POST'])
