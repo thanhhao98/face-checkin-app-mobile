@@ -1,1 +1,1 @@
-export const SERVER_IP = 'http://192.168.20.240:5000/'
+export const SERVER_IP = 'http://192.168.1.10:5000/'

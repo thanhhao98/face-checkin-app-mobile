@@ -159,7 +159,7 @@ export function DrawerContent(props) {
                 />
                 <DrawerItem
                   icon={({ color, size }) => (
-                    <Icon name="history"
+                    <Icon name="users"
                       color={color}
                       size={size}
                     />
