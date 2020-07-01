@@ -1,11 +1,17 @@
 import React from 'react';
-import { StyleSheet, View, Text, TextInput, StatusBar, AsyncStorage } from 'react-native';
+import { StyleSheet, View, Text, TextInput, StatusBar, AsyncStorage, Alert } from 'react-native';
 import { Title, Button } from 'react-native-paper';
 import {SERVER_IP} from '../Config.js'
 import Header from '../components/header.js'
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import ImagePicker from 'react-native-image-picker';
+import Loader from '../components/loader';
 
-
+const options = {
+    title: "Image",
+    takePhotoButtonTitle: "Take photo with your camera",
+    chooseFromLibraryButtonTitle: "Choose photo from library"   
+}
 class AddUserScreen extends React.Component {
     constructor(props) {
         super(props);
@@ -14,16 +20,41 @@ class AddUserScreen extends React.Component {
             email: '',
             password: '',
             checkLogin: false,
+            avatarSource: null,
+            isLoading: false,
         }
+    }
+
+    callAlert = (title, mess) => {
+        Alert.alert(
+            `${title}`,
+            `${mess} cannot empty`,
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancel Pressed"),
+                    style: "cancel"
+                },
+                { text: "OK", onPress: async () => {}}
+            ],
+            { cancelable: false }
+        )
     }
     sendData = async (props) => {
         let token = await AsyncStorage.getItem('token') || false;
         try {
+            this.setState({
+                isLoading: true
+            })
+        
             let data = {
                 username: this.state.username,
                 email: this.state.email,
-                password: this.state.password
+                password: this.state.password,
+                img: this.state.avatarSource
             }
+            
+            
             let post = { data }
 		    let res = await fetch(SERVER_IP+'api/v1/createUser', {
                 method: 'POST',
@@ -35,23 +66,50 @@ class AddUserScreen extends React.Component {
                 body: JSON.stringify(post)
             });
             let response = await res.json();
+            if(response) this.setState({isLoading: false})
+            console.log(response)
             if (!response.status) {
-                this.setState({
-                    checkLogin: true
-                })
+                Alert.alert(
+                    "Something is error",
+                    `${response.message}`,
+                    [
+                        {
+                            text: "Cancel",
+                            onPress: () => console.log("Cancel Pressed"),
+                            style: "cancel"
+                        },
+                        { text: "OK", onPress: async () => {}}
+                    ],
+                    { cancelable: false }
+                )
             }
             else {
-                let res = await fetch(SERVER_IP+'api/v1/listUser', {
-                    method: 'GET',
-                    headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                            'x-access-token': token,
-                    },
-                    });
-                    let response = await res.json();
-                    console.log(response.data)
-                    this.props.navigation.navigate('ManageUser',{data:response.data.listUsers})
+                Alert.alert(
+                    "Sign up Success",
+                    "Would you like to switch to the user management screen",
+                    [
+                        {
+                            text: "Cancel",
+                            onPress: () => console.log("Cancel Pressed"),
+                            style: "cancel"
+                        },
+                        { text: "OK", onPress: async () => {
+                            let res = await fetch(SERVER_IP+'api/v1/listUser', {
+                            method: 'GET',
+                            headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json',
+                                    'x-access-token': token,
+                            },
+                            });
+                        let response = await res.json();
+                        console.log(response.data)
+                        this.props.navigation.navigate('ManageUser',{data:response.data.listUsers})
+                        }}
+                    ],
+                    { cancelable: false }
+                )
+               
             }
 
             this.setState({
@@ -68,11 +126,48 @@ class AddUserScreen extends React.Component {
         console.error(e)
     }
 
+    createTwoButtonAlert = () =>
+    Alert.alert(
+      "Alert Title",
+      "My Alert Msg",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        { text: "OK", onPress: () => console.log("OK Pressed") }
+      ],
+      { cancelable: false }
+    );
+
+    myfun = (e) => {
+        ImagePicker.showImagePicker(options, (response) => {
+            // console.log('Response = ', response.data,"0000000000000000000000000");
+          
+            if (response.didCancel) {
+              console.log('User cancelled image picker');
+            } else if (response.error) {
+              console.log('ImagePicker Error: ', response.error);
+            } else if (response.customButton) {
+              console.log('User tapped custom button: ', response.customButton);
+            } else {
+              const source = response.data ;
+          
+               // const source = { uri: 'data:image/jpeg;base64,' + response.data };
+          
+              this.setState({
+                avatarSource: source,
+              });
+            }
+          });
+    }
+
     render() {
         return (
             <View style={styles.container}>
                 <StatusBar barStyle="dark-content" hidden={false} backgroundColor="#0a4ff0" translucent={true} />
-                <Header style={styles.new_header} title="Add User" navigation={this.props.navigation}/>
+                <Header style={styles.new_header} title="Add User" navigation={this.props.navigation} isBack={true}/>
                 <View style={styles.down}>
                     <Title style={{ color: 'blue' }} >Create new account</Title>
                     <View style={styles.textInputContainer}>
@@ -123,8 +218,12 @@ class AddUserScreen extends React.Component {
                             
                         </View>
                     </View>
+                    <TouchableOpacity style={{backgroundColor:'#ddd', margin:10,padding:10}} onPress={this.myfun}>
+                        <Text>Choose Image</Text>
+                    </TouchableOpacity>
+                    <Loader loading={this.state.isLoading}/>
                     <Button style={styles.buttonSignIn} onPress={this.sendData} >Sign Up</Button>
-
+                    <Button style={{backgroundColor:"red"}} onPress={this.createTwoButtonAlert} >Test</Button>
                 </View>
             </View>
         );

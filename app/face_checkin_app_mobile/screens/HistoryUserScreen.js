@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text , FlatList, Dimensions, StatusBar, AsyncStorage} from 'react-native';
+import { StyleSheet, View, Text , FlatList, Dimensions, StatusBar, AsyncStorage, ActivityIndicator} from 'react-native';
 import DatePicker from 'react-native-datepicker';
 import { Button } from 'react-native-paper';
 import Header from '../components/header';
@@ -28,12 +28,14 @@ export default class HistoryUserScreen extends React.Component {
             alldata:[],
             data: [],
             username: '',
+            isLoading: false
         }
     }
 
     async componentDidMount(){
         let token = await AsyncStorage.getItem('token') || false;
         const {data} =  this.props.route.params;
+            this.setState({ isLoading: true })
             let res = await fetch(SERVER_IP+`api/v1/getCheckHistoryWithUserId/${data}`, {
                 method: 'GET',
                 headers: {
@@ -43,6 +45,7 @@ export default class HistoryUserScreen extends React.Component {
                 },
             });
             let response = await res.json();
+            if(response) this.setState({ isLoading:false })
             this.setState({
                 data: response.data.data,
                 alldata: response.data.data,
@@ -52,6 +55,7 @@ export default class HistoryUserScreen extends React.Component {
 
     async componentDidUpdate(prevProps){
         if(this.props.route.params !== prevProps.route.params) {
+            this.setState({ isLoading: true })
             const {data} =  this.props.route.params;
             let token = await AsyncStorage.getItem('token') || false;
             let res = await fetch(SERVER_IP+`api/v1/getCheckHistoryWithUserId/${data}`, {
@@ -63,6 +67,7 @@ export default class HistoryUserScreen extends React.Component {
                 },
             });
             let response = await res.json();
+            if(response) this.setState({ isLoading:false })
             this.setState({
                 data: response.data.data,
                 alldata: response.data.data,
@@ -123,8 +128,8 @@ export default class HistoryUserScreen extends React.Component {
                     <Button onPress={()=>this.setState({data:this.state.alldata})}> Show All</Button>
                     <Button onPress={()=>{this.checkinLate()}}>Checkin Late</Button>
                 </View>
-                {/* {this.state.alldata.length === 0? <Text>Khong co data</Text>:<Text>Co data</Text>} */}
-                {this.state.alldata.length === 0? 
+                {this.state.isLoading? <ActivityIndicator animating={true} size="large"/>:
+                this.state.alldata.length === 0? 
                 <Text>No data</Text>:
                 <FlatList
                     style={styles.flatlist}

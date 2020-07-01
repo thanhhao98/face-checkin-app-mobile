@@ -11,7 +11,7 @@ const Loader = props => {
     loading,
     ...attributes
   } = props;
-
+  console.log(props, 'props loader')
   return (
     <Modal
       transparent={true}
@@ -21,6 +21,7 @@ const Loader = props => {
       <View style={styles.modalBackground}>
         <View style={styles.activityIndicatorWrapper}>
           <ActivityIndicator
+            size="large"
             animating={loading} />
         </View>
       </View>
@@ -37,9 +38,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#00000040'
   },
   activityIndicatorWrapper: {
-    backgroundColor: '#FFFFFF',
-    height: 100,
-    width: 100,
+    // backgroundColor: '#FFFFFF',
+    height: 300,
+    width: 300,
     borderRadius: 10,
     display: 'flex',
     alignItems: 'center',
