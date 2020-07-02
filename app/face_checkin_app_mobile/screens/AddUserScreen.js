@@ -223,7 +223,6 @@ class AddUserScreen extends React.Component {
                     </TouchableOpacity>
                     <Loader loading={this.state.isLoading}/>
                     <Button style={styles.buttonSignIn} onPress={this.sendData} >Sign Up</Button>
-                    <Button style={{backgroundColor:"red"}} onPress={this.createTwoButtonAlert} >Test</Button>
                 </View>
             </View>
         );

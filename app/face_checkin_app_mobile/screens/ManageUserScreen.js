@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, TextInput, StatusBar, FlatList, AsyncStorage, Dimensions}  from 'react-native';
+import { StyleSheet, View, Text, TextInput, StatusBar, FlatList, AsyncStorage, ActivityIndicator }  from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Header from '../components/header'
 import {SERVER_IP} from '../Config'
@@ -11,28 +11,31 @@ export default class ManageUserScreen extends React.Component {
         this.state = {
             date: '',
             data: [],
+            isLoading:false
         }
         
     }
 
 	async componentDidMount(){
-				 let token = await AsyncStorage.getItem('token') || false;
-				 let res = await fetch(SERVER_IP+'api/v1/listUser', {
-						 method: 'GET',
-						 headers: {
-								 'Accept': 'application/json',
-								 'Content-Type': 'application/json',
-								 'x-access-token': token,
-						 },
-				 });
-				 let response = await res.json();
-				 this.setState({
-						 data:response.data.listUsers
-				 })
-
-		 }
+        let token = await AsyncStorage.getItem('token') || false;
+        this.setState({ isLoading: true })
+        
+        let res = await fetch(SERVER_IP+'api/v1/listUser', {
+                method: 'GET',
+                headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'x-access-token': token,
+                },
+        });
+        let response = await res.json();
+        if(response) this.setState({ isLoading:false })
+        this.setState({
+                data:response.data.listUsers
+        })
+	}
 	async componentDidUpdate(prevProps){
-		const {data} = this.props.route.params;
+        const {data} = this.props.route.params;
         if(this.props.route.params && this.props.route.params !== prevProps.route.params) {
 										const {data} =  this.props.route.params;
                     this.setState({
@@ -46,6 +49,7 @@ export default class ManageUserScreen extends React.Component {
             <View style={styles.container}>
                 <StatusBar barStyle = "dark-content" hidden = {false} backgroundColor = "#0a4ff0" translucent = {true}/>
                 <Header title="Manage User" navigation={this.props.navigation} isStatus={true}/>
+                {this.state.isLoading?<ActivityIndicator animating={true} size="large" style={{ marginTop:100 }}/>:
                 <FlatList
                 style={styles.list}
                 const data = {this.state.data}
@@ -67,7 +71,7 @@ export default class ManageUserScreen extends React.Component {
                 
                 <Text style={styles.item}>{item.username}</Text>
                 </TouchableOpacity>}
-                />
+                />}
 
             </View>
         )

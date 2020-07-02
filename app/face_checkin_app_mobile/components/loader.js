@@ -11,7 +11,6 @@ const Loader = props => {
     loading,
     ...attributes
   } = props;
-  console.log(props, 'props loader')
   return (
     <Modal
       transparent={true}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text , FlatList, Dimensions, StatusBar, AsyncStorage} from 'react-native';
+import { StyleSheet, View, Text , FlatList, Dimensions, StatusBar, AsyncStorage, ActivityIndicator} from 'react-native';
 import DatePicker from 'react-native-datepicker';
 import { Button } from 'react-native-paper';
 import Header from '../components/header' 
@@ -28,10 +28,12 @@ export default class HistoryScreen extends React.Component {
             date: '',
             alldata:[],
             data: [],
+            isLoading: false
         }
     }    
     async componentDidMount(){
         let token = await AsyncStorage.getItem('token') || false;
+        this.setState({ isLoading:true })
         let res = await fetch(SERVER_IP+"api/v1/getCheckHistory", {
             method: 'GET',
             headers: {
@@ -40,6 +42,7 @@ export default class HistoryScreen extends React.Component {
                 'x-access-token': token,
             }});
         let response = await res.json();
+        if(response) this.setState({ isLoading:false })
         this.setState({
             data:response.data,
             alldata: response.data
@@ -49,14 +52,14 @@ export default class HistoryScreen extends React.Component {
     componentDidUpdate(prevProps) {
         const {data} = this.props.route.params;
         if(this.props.route.params && this.props.route.params !== prevProps.route.params) {
-                    let {data} =  this.props.route.params;
-                    data = data.reverse()
-                    console.log(data)
-                    this.setState({
-                        data: data,
-                        alldata: data,
-                    })
-                }
+            let {data} =  this.props.route.params;
+            data = data.reverse()
+            console.log(data)
+            this.setState({
+                data: data,
+                alldata: data,
+            })
+        }
     }
 
     checkinLate(){
@@ -110,6 +113,7 @@ export default class HistoryScreen extends React.Component {
                     <Button onPress={()=>this.setState({data:this.state.alldata})}> Show All</Button>
                     <Button onPress={()=>{this.checkinLate()}}>Checkin Late</Button>
                 </View>
+                {this.state.isLoading?<ActivityIndicator animating={true} size="large"/>:
                 <FlatList
                     style={styles.flatlist}
                     const data = {this.state.data}
@@ -122,7 +126,7 @@ export default class HistoryScreen extends React.Component {
                         checkoutOntime={item.checkout.onTime}
                     />}
                     keyExtractor={(item, index) => index.toString()} 
-                />
+                />}
             </View>
         )
     }
